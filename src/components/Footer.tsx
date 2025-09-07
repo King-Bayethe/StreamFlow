@@ -7,10 +7,10 @@ const Footer = () => {
     {
       title: "Platform",
       links: [
-        { name: "Start Streaming", href: "#" },
-        { name: "Browse Streams", href: "#" },
-        { name: "Creator Dashboard", href: "#" },
-        { name: "Earnings", href: "#" },
+        { name: "Start Streaming", href: "/dashboard" },
+        { name: "Browse Streams", href: "/browse" },
+        { name: "Creator Dashboard", href: "/dashboard" },
+        { name: "My Profile", href: "/profile" },
         { name: "Analytics", href: "#" }
       ]
     },
