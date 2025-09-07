@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import Watch from "./pages/Watch";
+import CreatorDashboard from "./pages/CreatorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/watch/:streamId?" element={<Watch />} />
+          <Route path="/dashboard" element={<CreatorDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
