@@ -293,9 +293,12 @@ const Browse = () => {
                 <Button 
                   className="w-full" 
                   variant={stream.status === "live" ? "default" : "secondary"}
+                  asChild
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  {stream.status === "live" ? "Join Stream" : "Set Reminder"}
+                  <a href={`/watch/${stream.id}`}>
+                    <Play className="w-4 h-4 mr-2" />
+                    {stream.status === "live" ? "Join Stream" : "Set Reminder"}
+                  </a>
                 </Button>
               </div>
             </Card>

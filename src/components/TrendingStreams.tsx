@@ -102,8 +102,8 @@ const TrendingStreams = () => {
                   </div>
                 </div>
                 
-                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-white transition-all">
-                  Watch Now
+                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-white transition-all" asChild>
+                  <a href={`/watch/${stream.id}`}>Watch Now</a>
                 </Button>
               </div>
             </Card>
