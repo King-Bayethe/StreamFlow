@@ -43,7 +43,8 @@ import {
   Monitor,
   MessageSquare,
   HelpCircle,
-  Crown
+  Crown,
+  Trophy
 } from "lucide-react";
 import StreamingControls from '@/components/StreamingControls';
 import StreamMetrics from '@/components/StreamMetrics';
@@ -57,6 +58,7 @@ import QASession from '@/components/QASession';
 import Giveaways from '@/components/Giveaways';
 import LoyaltyBadges from '@/components/LoyaltyBadges';
 import StreamOverlays from '@/components/StreamOverlays';
+import ViewerGamification from '@/components/ViewerGamification';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -145,7 +147,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:grid-cols-13">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -201,6 +203,10 @@ const CreatorDashboard = () => {
             <TabsTrigger value="overlays" className="flex items-center gap-2">
               <Monitor className="w-4 h-4" />
               Overlays
+            </TabsTrigger>
+            <TabsTrigger value="gamification" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Gamification
             </TabsTrigger>
           </TabsList>
 
@@ -597,6 +603,10 @@ const CreatorDashboard = () => {
 
           <TabsContent value="overlays" className="space-y-6">
             <StreamOverlays isLive={isLive} />
+          </TabsContent>
+
+          <TabsContent value="gamification" className="space-y-6">
+            <ViewerGamification />
           </TabsContent>
 
           {/* Moderation Tab */}
