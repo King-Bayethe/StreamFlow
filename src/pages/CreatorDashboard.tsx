@@ -42,7 +42,8 @@ import {
   Video,
   Monitor,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  Crown
 } from "lucide-react";
 import StreamingControls from '@/components/StreamingControls';
 import StreamMetrics from '@/components/StreamMetrics';
@@ -51,6 +52,11 @@ import OBSIntegrationGuide from '@/components/OBSIntegrationGuide';
 import Simulcasting from '@/components/Simulcasting';
 import UnifiedChat from '@/components/UnifiedChat';
 import Analytics from '@/components/Analytics';
+import LivePolls from '@/components/LivePolls';
+import QASession from '@/components/QASession';
+import Giveaways from '@/components/Giveaways';
+import LoyaltyBadges from '@/components/LoyaltyBadges';
+import StreamOverlays from '@/components/StreamOverlays';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -139,7 +145,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:grid-cols-12">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -175,6 +181,26 @@ const CreatorDashboard = () => {
             <TabsTrigger value="moderation" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               Moderation
+            </TabsTrigger>
+            <TabsTrigger value="polls" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Polls
+            </TabsTrigger>
+            <TabsTrigger value="qa" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Q&A
+            </TabsTrigger>
+            <TabsTrigger value="giveaways" className="flex items-center gap-2">
+              <Gift className="w-4 h-4" />
+              Giveaways
+            </TabsTrigger>
+            <TabsTrigger value="badges" className="flex items-center gap-2">
+              <Crown className="w-4 h-4" />
+              Badges
+            </TabsTrigger>
+            <TabsTrigger value="overlays" className="flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Overlays
             </TabsTrigger>
           </TabsList>
 
@@ -550,6 +576,27 @@ const CreatorDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Engagement Tabs */}
+          <TabsContent value="polls" className="space-y-6">
+            <LivePolls isLive={isLive} />
+          </TabsContent>
+
+          <TabsContent value="qa" className="space-y-6">
+            <QASession isLive={isLive} />
+          </TabsContent>
+
+          <TabsContent value="giveaways" className="space-y-6">
+            <Giveaways isLive={isLive} />
+          </TabsContent>
+
+          <TabsContent value="badges" className="space-y-6">
+            <LoyaltyBadges />
+          </TabsContent>
+
+          <TabsContent value="overlays" className="space-y-6">
+            <StreamOverlays isLive={isLive} />
           </TabsContent>
 
           {/* Moderation Tab */}
