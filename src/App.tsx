@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import Watch from "./pages/Watch";
 import Channel from "./pages/Channel";
+import Support from "./pages/Support";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import ViewerProfile from "./pages/ViewerProfile";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/browse" element={<Browse />} />
           <Route path="/watch/:streamId?" element={<Watch />} />
           <Route path="/channel/:username" element={<Channel />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/dashboard" element={<CreatorDashboard />} />
           <Route path="/profile" element={<ViewerProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

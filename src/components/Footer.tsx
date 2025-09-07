@@ -18,11 +18,11 @@ const Footer = () => {
     {
       title: "Support",
       links: [
-        { name: "Help Center", href: "#" },
-        { name: "Community Guidelines", href: "#" },
-        { name: "Safety Center", href: "#" },
-        { name: "Contact Us", href: "#" },
-        { name: "Report Issue", href: "#" }
+        { name: "Help Center", href: "/support" },
+        { name: "Community Guidelines", href: "/support#policies" },
+        { name: "Contact Support", href: "/support#contact" },
+        { name: "System Status", href: "/support#status" },
+        { name: "Report Issue", href: "/support" }
       ]
     },
     {

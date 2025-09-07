@@ -41,7 +41,8 @@ import {
   Radio,
   Video,
   Monitor,
-  MessageSquare
+  MessageSquare,
+  HelpCircle
 } from "lucide-react";
 import StreamingControls from '@/components/StreamingControls';
 import StreamMetrics from '@/components/StreamMetrics';
@@ -119,6 +120,12 @@ const CreatorDashboard = () => {
               <Badge variant={isLive ? "default" : "secondary"} className="px-3 py-1">
                 {isLive ? "🔴 LIVE" : "⭕ Offline"}
               </Badge>
+              <Button variant="outline" asChild>
+                <a href="/support">
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Support
+                </a>
+              </Button>
               <Button variant="outline" asChild>
                 <a href="/watch/creator-123" target="_blank">
                   <ExternalLink className="w-4 h-4 mr-2" />
