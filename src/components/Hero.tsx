@@ -58,9 +58,11 @@ const Hero = () => {
               <Play className="w-5 h-5 mr-2" />
               Start Streaming
             </Button>
-            <Button variant="glass" size="lg" className="text-lg px-8 py-4">
-              <Users className="w-5 h-5 mr-2" />
-              Join as Viewer
+            <Button variant="glass" size="lg" className="text-lg px-8 py-4" asChild>
+              <a href="/browse">
+                <Users className="w-5 h-5 mr-2" />
+                Browse Streams
+              </a>
             </Button>
           </div>
         </div>
