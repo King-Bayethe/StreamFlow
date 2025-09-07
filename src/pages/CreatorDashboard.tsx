@@ -44,7 +44,8 @@ import {
   MessageSquare,
   HelpCircle,
   Crown,
-  Trophy
+  Trophy,
+  Shield
 } from "lucide-react";
 import StreamingControls from '@/components/StreamingControls';
 import StreamMetrics from '@/components/StreamMetrics';
@@ -147,7 +148,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:grid-cols-13">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -160,53 +161,17 @@ const CreatorDashboard = () => {
               <Radio className="w-4 h-4" />
               Streaming
             </TabsTrigger>
-            <TabsTrigger value="simulcast" className="flex items-center gap-2">
-              <Monitor className="w-4 h-4" />
-              Simulcast
+            <TabsTrigger value="engagement" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Engagement
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Unified Chat
-            </TabsTrigger>
-            <TabsTrigger value="metrics" className="flex items-center gap-2">
-              <Monitor className="w-4 h-4" />
-              Metrics
-            </TabsTrigger>
-            <TabsTrigger value="recordings" className="flex items-center gap-2">
-              <Video className="w-4 h-4" />
-              Recordings
-            </TabsTrigger>
-            <TabsTrigger value="earnings" className="flex items-center gap-2">
+            <TabsTrigger value="monetization" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              Earnings
+              Monetization
             </TabsTrigger>
-            <TabsTrigger value="moderation" className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Moderation
-            </TabsTrigger>
-            <TabsTrigger value="polls" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Polls
-            </TabsTrigger>
-            <TabsTrigger value="qa" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Q&A
-            </TabsTrigger>
-            <TabsTrigger value="giveaways" className="flex items-center gap-2">
-              <Gift className="w-4 h-4" />
-              Giveaways
-            </TabsTrigger>
-            <TabsTrigger value="badges" className="flex items-center gap-2">
-              <Crown className="w-4 h-4" />
-              Badges
-            </TabsTrigger>
-            <TabsTrigger value="overlays" className="flex items-center gap-2">
-              <Monitor className="w-4 h-4" />
-              Overlays
-            </TabsTrigger>
-            <TabsTrigger value="gamification" className="flex items-center gap-2">
-              <Trophy className="w-4 h-4" />
-              Gamification
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -333,23 +298,54 @@ const CreatorDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Streaming Controls Tab */}
-          <TabsContent value="streaming" className="space-y-6">
-            <StreamingControls userId="mock-user-id" />
-            <OBSIntegrationGuide 
-              rtmpUrl="rtmp://live.example.com/live" 
-              streamKey="sk_live_12345abcdef67890" 
-            />
-          </TabsContent>
-
-          {/* Simulcasting Tab */}
-          <TabsContent value="simulcast" className="space-y-6">
-            <Simulcasting userId="mock-user-id" />
-          </TabsContent>
-
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <Analytics />
+          </TabsContent>
+
+          {/* Streaming Tab */}
+          <TabsContent value="streaming" className="space-y-6">
+            <Tabs defaultValue="controls" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="controls">Controls</TabsTrigger>
+                <TabsTrigger value="simulcast">Simulcast</TabsTrigger>
+                <TabsTrigger value="chat">Unified Chat</TabsTrigger>
+                <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                <TabsTrigger value="recordings">Recordings</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="controls">
+                <StreamingControls userId="mock-user-id" />
+                <div className="mt-6">
+                  <OBSIntegrationGuide 
+                    rtmpUrl="rtmp://live.example.com/live" 
+                    streamKey="sk_live_12345abcdef67890" 
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="simulcast">
+                <Simulcasting userId="mock-user-id" />
+              </TabsContent>
+              
+              <TabsContent value="chat">
+                <UnifiedChat 
+                  isSimulcasting={isLive} 
+                  activePlatforms={['youtube', 'twitch']} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="metrics">
+                <StreamMetrics 
+                  streamId="mock-stream-id" 
+                  isLive={isLive} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="recordings">
+                <StreamRecordings userId="mock-user-id" />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           {/* Unified Chat Tab */}
