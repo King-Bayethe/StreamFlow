@@ -337,6 +337,214 @@ export type Database = {
           },
         ]
       }
+      stream_metrics: {
+        Row: {
+          bitrate: number
+          connection_quality: string
+          cpu_usage: number
+          dropped_frames: number
+          fps: number
+          id: string
+          latency_ms: number
+          memory_usage: number
+          stream_id: string
+          timestamp: string
+        }
+        Insert: {
+          bitrate?: number
+          connection_quality?: string
+          cpu_usage?: number
+          dropped_frames?: number
+          fps?: number
+          id?: string
+          latency_ms?: number
+          memory_usage?: number
+          stream_id: string
+          timestamp?: string
+        }
+        Update: {
+          bitrate?: number
+          connection_quality?: string
+          cpu_usage?: number
+          dropped_frames?: number
+          fps?: number
+          id?: string
+          latency_ms?: number
+          memory_usage?: number
+          stream_id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_metrics_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_recordings: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          file_size_mb: number
+          id: string
+          is_public: boolean
+          session_id: string | null
+          stream_id: string
+          thumbnail_url: string | null
+          title: string
+          video_url: string | null
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number
+          file_size_mb?: number
+          id?: string
+          is_public?: boolean
+          session_id?: string | null
+          stream_id: string
+          thumbnail_url?: string | null
+          title: string
+          video_url?: string | null
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          file_size_mb?: number
+          id?: string
+          is_public?: boolean
+          session_id?: string | null
+          stream_id?: string
+          thumbnail_url?: string | null
+          title?: string
+          video_url?: string | null
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "stream_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stream_recordings_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_sessions: {
+        Row: {
+          avg_bitrate: number | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          peak_viewers: number
+          quality_score: number | null
+          session_end: string | null
+          session_start: string
+          stream_id: string
+          total_messages: number
+          total_tips: number
+        }
+        Insert: {
+          avg_bitrate?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          peak_viewers?: number
+          quality_score?: number | null
+          session_end?: string | null
+          session_start?: string
+          stream_id: string
+          total_messages?: number
+          total_tips?: number
+        }
+        Update: {
+          avg_bitrate?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          peak_viewers?: number
+          quality_score?: number | null
+          session_end?: string | null
+          session_start?: string
+          stream_id?: string
+          total_messages?: number
+          total_tips?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_sessions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streams: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string | null
+          ended_at: string | null
+          hls_url: string | null
+          id: string
+          is_recording: boolean
+          max_viewers: number
+          rtmp_key: string
+          started_at: string | null
+          status: string
+          stream_key: string
+          thumbnail_url: string | null
+          title: string
+          viewer_count: number
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          ended_at?: string | null
+          hls_url?: string | null
+          id?: string
+          is_recording?: boolean
+          max_viewers?: number
+          rtmp_key?: string
+          started_at?: string | null
+          status?: string
+          stream_key?: string
+          thumbnail_url?: string | null
+          title?: string
+          viewer_count?: number
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          ended_at?: string | null
+          hls_url?: string | null
+          id?: string
+          is_recording?: boolean
+          max_viewers?: number
+          rtmp_key?: string
+          started_at?: string | null
+          status?: string
+          stream_key?: string
+          thumbnail_url?: string | null
+          title?: string
+          viewer_count?: number
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -405,7 +613,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      regenerate_stream_key: {
+        Args: { _stream_id: string }
+        Returns: string
+      }
+      update_stream_metrics: {
+        Args: {
+          _bitrate: number
+          _connection_quality: string
+          _cpu_usage: number
+          _dropped_frames: number
+          _fps: number
+          _latency_ms: number
+          _memory_usage: number
+          _stream_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
