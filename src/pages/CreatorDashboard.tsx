@@ -40,12 +40,15 @@ import {
   Edit,
   Radio,
   Video,
-  Monitor
+  Monitor,
+  MessageSquare
 } from "lucide-react";
 import StreamingControls from '@/components/StreamingControls';
 import StreamMetrics from '@/components/StreamMetrics';
 import StreamRecordings from '@/components/StreamRecordings';
 import OBSIntegrationGuide from '@/components/OBSIntegrationGuide';
+import Simulcasting from '@/components/Simulcasting';
+import UnifiedChat from '@/components/UnifiedChat';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -128,7 +131,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -136,6 +139,14 @@ const CreatorDashboard = () => {
             <TabsTrigger value="streaming" className="flex items-center gap-2">
               <Radio className="w-4 h-4" />
               Streaming
+            </TabsTrigger>
+            <TabsTrigger value="simulcast" className="flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Simulcast
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Unified Chat
             </TabsTrigger>
             <TabsTrigger value="metrics" className="flex items-center gap-2">
               <Monitor className="w-4 h-4" />
@@ -284,6 +295,19 @@ const CreatorDashboard = () => {
             <OBSIntegrationGuide 
               rtmpUrl="rtmp://live.example.com/live" 
               streamKey="sk_live_12345abcdef67890" 
+            />
+          </TabsContent>
+
+          {/* Simulcasting Tab */}
+          <TabsContent value="simulcast" className="space-y-6">
+            <Simulcasting userId="mock-user-id" />
+          </TabsContent>
+
+          {/* Unified Chat Tab */}
+          <TabsContent value="chat" className="space-y-6">
+            <UnifiedChat 
+              isSimulcasting={isLive} 
+              activePlatforms={['youtube', 'twitch']} 
             />
           </TabsContent>
 
