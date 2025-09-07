@@ -155,7 +155,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -179,10 +179,6 @@ const CreatorDashboard = () => {
             <TabsTrigger value="ai-suite" className="flex items-center gap-2">
               <Zap className="w-4 h-4" />
               AI Suite
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -733,10 +729,101 @@ const CreatorDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Analytics />
+          </TabsContent>
+
+          {/* Streaming Tab */}
+          <TabsContent value="streaming" className="space-y-6">
+            <Tabs defaultValue="controls" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="controls">Controls</TabsTrigger>
+                <TabsTrigger value="simulcast">Simulcast</TabsTrigger>
+                <TabsTrigger value="chat">Chat</TabsTrigger>
+                <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                <TabsTrigger value="recordings">Recordings</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="controls">
+                <StreamingControls userId="user-id" />
+              </TabsContent>
+
+              <TabsContent value="simulcast">
+                <Simulcasting userId="user-id" />
+              </TabsContent>
+
+              <TabsContent value="chat">
+                <UnifiedChat isSimulcasting={false} activePlatforms={[]} />
+              </TabsContent>
+
+              <TabsContent value="metrics">
+                <StreamMetrics streamId="stream-id" isLive={isLive} />
+              </TabsContent>
+
+              <TabsContent value="recordings">
+                <StreamRecordings userId="user-id" />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Engagement Tab */}
+          <TabsContent value="engagement" className="space-y-6">
+            <Tabs defaultValue="polls" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+                <TabsTrigger value="polls">Polls</TabsTrigger>
+                <TabsTrigger value="qa">Q&A</TabsTrigger>
+                <TabsTrigger value="giveaways">Giveaways</TabsTrigger>
+                <TabsTrigger value="badges">Badges</TabsTrigger>
+                <TabsTrigger value="overlays">Overlays</TabsTrigger>
+                <TabsTrigger value="gamification">Gamification</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="polls">
+                <LivePolls isLive={isLive} />
+              </TabsContent>
+
+              <TabsContent value="qa">
+                <QASession isLive={isLive} />
+              </TabsContent>
+
+              <TabsContent value="giveaways">
+                <Giveaways isLive={isLive} />
+              </TabsContent>
+
+              <TabsContent value="badges">
+                <LoyaltyBadges />
+              </TabsContent>
+
+              <TabsContent value="overlays">
+                <StreamOverlays isLive={isLive} />
+              </TabsContent>
+
+              <TabsContent value="gamification">
+                <ViewerGamification />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Monetization Tab */}
+          <TabsContent value="monetization" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Monetization Dashboard</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Monetization features coming soon!</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* AI Suite Tab */}
           <TabsContent value="ai-suite" className="space-y-6">
-            <Tabs defaultValue="co-streamer" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+            <Tabs defaultValue="clipping" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+                <TabsTrigger value="clipping">Auto-Clipping</TabsTrigger>
                 <TabsTrigger value="co-streamer">Co-Streamer</TabsTrigger>
                 <TabsTrigger value="insights">Insights</TabsTrigger>
                 <TabsTrigger value="safety">Safety</TabsTrigger>
@@ -744,6 +831,10 @@ const CreatorDashboard = () => {
                 <TabsTrigger value="captions">Captions</TabsTrigger>
                 <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="clipping">
+                <AIClippingSystem />
+              </TabsContent>
 
               <TabsContent value="co-streamer">
                 <AICoStreamer isActive={false} onToggle={() => {}} />
