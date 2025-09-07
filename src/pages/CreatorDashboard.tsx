@@ -67,6 +67,7 @@ import AITrustSafety from '@/components/AITrustSafety';
 import AIDiscoveryEngine from '@/components/AIDiscoveryEngine';
 import AILiveCaptions from '@/components/AILiveCaptions';
 import AIAgentMarketplace from '@/components/AIAgentMarketplace';
+import AIContentOptimizer from '@/components/AIContentOptimizer';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -822,10 +823,11 @@ const CreatorDashboard = () => {
           {/* AI Suite Tab */}
           <TabsContent value="ai-suite" className="space-y-6">
             <Tabs defaultValue="clipping" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
                 <TabsTrigger value="clipping">Auto-Clipping</TabsTrigger>
                 <TabsTrigger value="co-streamer">Co-Streamer</TabsTrigger>
                 <TabsTrigger value="insights">Insights</TabsTrigger>
+                <TabsTrigger value="optimizer">Optimizer</TabsTrigger>
                 <TabsTrigger value="safety">Safety</TabsTrigger>
                 <TabsTrigger value="discovery">Discovery</TabsTrigger>
                 <TabsTrigger value="captions">Captions</TabsTrigger>
@@ -842,6 +844,10 @@ const CreatorDashboard = () => {
 
               <TabsContent value="insights">
                 <AIAudienceInsights />
+              </TabsContent>
+
+              <TabsContent value="optimizer">
+                <AIContentOptimizer />
               </TabsContent>
 
               <TabsContent value="safety">
