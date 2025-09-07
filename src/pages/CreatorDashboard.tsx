@@ -37,8 +37,15 @@ import {
   Search,
   Plus,
   Trash2,
-  Edit
+  Edit,
+  Radio,
+  Video,
+  Monitor
 } from "lucide-react";
+import StreamingControls from '@/components/StreamingControls';
+import StreamMetrics from '@/components/StreamMetrics';
+import StreamRecordings from '@/components/StreamRecordings';
+import OBSIntegrationGuide from '@/components/OBSIntegrationGuide';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -121,14 +128,22 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="streams" className="flex items-center gap-2">
-              <Play className="w-4 h-4" />
-              Streams
+            <TabsTrigger value="streaming" className="flex items-center gap-2">
+              <Radio className="w-4 h-4" />
+              Streaming
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Metrics
+            </TabsTrigger>
+            <TabsTrigger value="recordings" className="flex items-center gap-2">
+              <Video className="w-4 h-4" />
+              Recordings
             </TabsTrigger>
             <TabsTrigger value="earnings" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
@@ -263,7 +278,29 @@ const CreatorDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Streams Management Tab */}
+          {/* Streaming Controls Tab */}
+          <TabsContent value="streaming" className="space-y-6">
+            <StreamingControls userId="mock-user-id" />
+            <OBSIntegrationGuide 
+              rtmpUrl="rtmp://live.example.com/live" 
+              streamKey="sk_live_12345abcdef67890" 
+            />
+          </TabsContent>
+
+          {/* Stream Metrics Tab */}
+          <TabsContent value="metrics" className="space-y-6">
+            <StreamMetrics 
+              streamId="mock-stream-id" 
+              isLive={isLive} 
+            />
+          </TabsContent>
+
+          {/* Recordings Tab */}
+          <TabsContent value="recordings" className="space-y-6">
+            <StreamRecordings userId="mock-user-id" />
+          </TabsContent>
+
+          {/* Legacy Streams Management Tab */}
           <TabsContent value="streams" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Go Live Controls */}
