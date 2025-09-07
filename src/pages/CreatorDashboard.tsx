@@ -60,6 +60,13 @@ import Giveaways from '@/components/Giveaways';
 import LoyaltyBadges from '@/components/LoyaltyBadges';
 import StreamOverlays from '@/components/StreamOverlays';
 import ViewerGamification from '@/components/ViewerGamification';
+import AIClippingSystem from '@/components/AIClippingSystem';
+import AICoStreamer from '@/components/AICoStreamer';
+import AIAudienceInsights from '@/components/AIAudienceInsights';
+import AITrustSafety from '@/components/AITrustSafety';
+import AIDiscoveryEngine from '@/components/AIDiscoveryEngine';
+import AILiveCaptions from '@/components/AILiveCaptions';
+import AIAgentMarketplace from '@/components/AIAgentMarketplace';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -148,7 +155,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -168,6 +175,14 @@ const CreatorDashboard = () => {
             <TabsTrigger value="monetization" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               Monetization
+            </TabsTrigger>
+            <TabsTrigger value="ai-suite" className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              AI Suite
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -716,6 +731,119 @@ const CreatorDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* AI Suite Tab */}
+          <TabsContent value="ai-suite" className="space-y-6">
+            <Tabs defaultValue="co-streamer" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+                <TabsTrigger value="co-streamer">Co-Streamer</TabsTrigger>
+                <TabsTrigger value="insights">Insights</TabsTrigger>
+                <TabsTrigger value="safety">Safety</TabsTrigger>
+                <TabsTrigger value="discovery">Discovery</TabsTrigger>
+                <TabsTrigger value="captions">Captions</TabsTrigger>
+                <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="co-streamer">
+                <AICoStreamer isActive={false} onToggle={() => {}} />
+              </TabsContent>
+
+              <TabsContent value="insights">
+                <AIAudienceInsights />
+              </TabsContent>
+
+              <TabsContent value="safety">
+                <AITrustSafety />
+              </TabsContent>
+
+              <TabsContent value="discovery">
+                <AIDiscoveryEngine />
+              </TabsContent>
+
+              <TabsContent value="captions">
+                <AILiveCaptions />
+              </TabsContent>
+
+              <TabsContent value="marketplace">
+                <AIAgentMarketplace />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Tabs defaultValue="chat-moderation" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="chat-moderation">Chat Moderation</TabsTrigger>
+                <TabsTrigger value="user-management">User Management</TabsTrigger>
+                <TabsTrigger value="content-filters">Content Filters</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="chat-moderation">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Chat Moderation Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="font-medium">Blocked Keywords</h3>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add keyword to block..."
+                          value={newKeyword}
+                          onChange={(e) => setNewKeyword(e.target.value)}
+                        />
+                        <Button
+                          onClick={() => {
+                            if (newKeyword && !blockedKeywords.includes(newKeyword)) {
+                              setBlockedKeywords([...blockedKeywords, newKeyword]);
+                              setNewKeyword("");
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {blockedKeywords.map((keyword) => (
+                          <Badge
+                            key={keyword}
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => setBlockedKeywords(blockedKeywords.filter(k => k !== keyword))}
+                          >
+                            {keyword} ×
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-medium">Auto-Moderation</h3>
+                      
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Auto-mute spam</Label>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Auto-delete offensive messages</Label>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Require approval for new followers</Label>
+                        <Switch />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
