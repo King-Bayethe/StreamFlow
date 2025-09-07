@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PaymentModal } from "@/components/PaymentModal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,7 @@ const Watch = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewerCount, setViewerCount] = useState(12847);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   // Mock data - in real app this would come from API
   const stream = {
@@ -132,19 +134,22 @@ const Watch = () => {
   };
 
   const sendTip = () => {
-    if (tipAmount <= 0) return;
-    
-    const tipMessage: ChatMessage = {
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = (amount: number, tipMessage: string) => {
+    const newMessage: ChatMessage = {
       id: Date.now().toString(),
       username: "You",
-      message: `Thanks for the amazing stream! Keep it up! 💝`,
+      message: tipMessage || `Thanks for the amazing stream! 💝`,
       timestamp: new Date(),
       isPaid: true,
-      amount: tipAmount,
+      amount: amount,
+      isPinned: true, // Paid messages are automatically pinned
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
     };
     
-    setChatMessages(prev => [...prev, tipMessage]);
+    setChatMessages(prev => [...prev, newMessage]);
   };
 
   // Simulate real-time viewer count changes
@@ -350,25 +355,12 @@ const Watch = () => {
             <div className="p-4 border-t bg-muted/30">
               <div className="mb-3">
                 <h4 className="text-sm font-medium mb-2">Send a Tip</h4>
-                <div className="flex gap-2 mb-2">
-                  {[5, 10, 25, 50].map(amount => (
-                    <Button
-                      key={amount}
-                      size="sm"
-                      variant={tipAmount === amount ? "default" : "outline"}
-                      onClick={() => setTipAmount(amount)}
-                      className="flex-1"
-                    >
-                      ${amount}
-                    </Button>
-                  ))}
-                </div>
                 <Button 
                   className="w-full bg-gradient-to-r from-accent to-primary text-white"
                   onClick={sendTip}
                 >
                   <Gift className="w-4 h-4 mr-2" />
-                  Send ${tipAmount} Tip
+                  Send Tip with Message
                 </Button>
               </div>
             </div>
@@ -397,6 +389,15 @@ const Watch = () => {
             </div>
           </Card>
         </div>
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          creatorName={creator.name}
+          creatorAvatar={creator.avatar}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       </div>
     </div>
   );
