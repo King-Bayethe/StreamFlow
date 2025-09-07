@@ -253,7 +253,12 @@ const Watch = () => {
               
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-xl font-semibold">{creator.name}</h2>
+                  <a 
+                    href={`/channel/${creator.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="text-xl font-semibold hover:text-primary transition-colors"
+                  >
+                    {creator.name}
+                  </a>
                   <Badge variant="outline" className="text-xs">
                     {creator.followers.toLocaleString()} followers
                   </Badge>

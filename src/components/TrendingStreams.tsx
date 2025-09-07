@@ -89,7 +89,12 @@ const TrendingStreams = () => {
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                   {stream.title}
                 </h3>
-                <p className="text-muted-foreground mb-3">{stream.creator}</p>
+                <a 
+                  href={`/channel/${stream.creator.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-muted-foreground hover:text-primary transition-colors mb-3 inline-block"
+                >
+                  {stream.creator}
+                </a>
                 
                 <div className="flex justify-between items-center mb-4 text-sm">
                   <div className="flex items-center text-muted-foreground">

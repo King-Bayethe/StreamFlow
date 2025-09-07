@@ -9,9 +9,10 @@ const Footer = () => {
       links: [
         { name: "Start Streaming", href: "/dashboard" },
         { name: "Browse Streams", href: "/browse" },
+        { name: "Top Creators", href: "/channel/gaming-pro" },
         { name: "Creator Dashboard", href: "/dashboard" },
         { name: "My Profile", href: "/profile" },
-        { name: "Analytics", href: "#" }
+        { name: "Channel Examples", href: "/channel/gaming-pro" }
       ]
     },
     {
