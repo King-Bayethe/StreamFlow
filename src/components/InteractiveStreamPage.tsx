@@ -43,8 +43,8 @@ interface ChatMessage {
   amount?: number;
   isPinned?: boolean;
   avatar: string;
-  level?: number;
-  badges?: string[];
+  level: number;
+  badges: string[];
   xpGained?: number;
 }
 
@@ -97,49 +97,49 @@ const InteractiveStreamPage = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      username: "GameMaster_Pro",
-      message: "This city build is absolutely incredible! The detail is amazing 🏗️",
-      timestamp: new Date(Date.now() - 30000),
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=40&h=40&fit=crop&crop=face",
-      level: 47,
-      badges: ["vip", "supporter"],
-      xpGained: 15
-    },
-    {
-      id: "2",
-      username: "ArchitectFan",
-      message: "Thanks for the amazing stream! Here's a tip for your awesome work! 💰",
-      timestamp: new Date(Date.now() - 45000),
-      isPaid: true,
-      amount: 25,
-      isPinned: true,
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5ff?w=40&h=40&fit=crop&crop=face",
-      level: 23,
-      badges: ["legend", "first_time"],
-      xpGained: 50
-    },
-    {
-      id: "3",
-      username: "CityPlanner_2024",
-      message: "That bridge design technique is brilliant! Can you show the traffic flow simulation?",
-      timestamp: new Date(Date.now() - 15000),
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      level: 32,
-      badges: ["expert"],
-      xpGained: 20
-    },
-    {
-      id: "4",
-      username: "NewViewer_123",
-      message: "First time watching, this is so relaxing and educational!",
-      timestamp: new Date(Date.now() - 10000),
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      level: 1,
-      badges: ["newcomer"],
-      xpGained: 5
-    }
+      {
+        id: "1",
+        username: "GameMaster_Pro",
+        message: "This city build is absolutely incredible! The detail is amazing 🏗️",
+        timestamp: new Date(Date.now() - 30000),
+        avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=40&h=40&fit=crop&crop=face",
+        level: 47,
+        badges: ["vip", "supporter"],
+        xpGained: 15
+      },
+      {
+        id: "2",
+        username: "ArchitectFan",
+        message: "Thanks for the amazing stream! Here's a tip for your awesome work! 💰",
+        timestamp: new Date(Date.now() - 45000),
+        isPaid: true,
+        amount: 25,
+        isPinned: true,
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5ff?w=40&h=40&fit=crop&crop=face",
+        level: 23,
+        badges: ["legend", "first_time"],
+        xpGained: 50
+      },
+      {
+        id: "3",
+        username: "CityPlanner_2024",
+        message: "That bridge design technique is brilliant! Can you show the traffic flow simulation?",
+        timestamp: new Date(Date.now() - 15000),
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+        level: 32,
+        badges: ["expert"],
+        xpGained: 20
+      },
+      {
+        id: "4",
+        username: "NewViewer_123",
+        message: "First time watching, this is so relaxing and educational!",
+        timestamp: new Date(Date.now() - 10000),
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+        level: 1,
+        badges: ["newcomer"],
+        xpGained: 5
+      }
   ]);
 
   const activePoll: ActivePoll = {
