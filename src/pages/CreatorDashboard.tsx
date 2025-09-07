@@ -50,6 +50,7 @@ import StreamRecordings from '@/components/StreamRecordings';
 import OBSIntegrationGuide from '@/components/OBSIntegrationGuide';
 import Simulcasting from '@/components/Simulcasting';
 import UnifiedChat from '@/components/UnifiedChat';
+import Analytics from '@/components/Analytics';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -138,10 +139,14 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:grid-cols-9">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <PieChart className="w-4 h-4" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="streaming" className="flex items-center gap-2">
               <Radio className="w-4 h-4" />
@@ -308,6 +313,11 @@ const CreatorDashboard = () => {
           {/* Simulcasting Tab */}
           <TabsContent value="simulcast" className="space-y-6">
             <Simulcasting userId="mock-user-id" />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Analytics />
           </TabsContent>
 
           {/* Unified Chat Tab */}
