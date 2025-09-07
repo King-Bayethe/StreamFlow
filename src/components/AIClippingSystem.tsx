@@ -1,702 +1,748 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Scissors, 
-  Zap, 
-  Sparkles, 
+  Play, 
+  Download, 
+  Share2, 
   TrendingUp,
   MessageSquare,
   Volume2,
-  Eye,
-  Download,
-  Share2,
-  Play,
+  Activity,
+  Zap,
   Clock,
-  Hash,
-  Trophy,
-  Flame,
+  Star,
+  Eye,
   Heart,
-  Users,
+  Upload,
+  Edit,
+  Trash2,
   Settings,
-  Wand2,
-  FileVideo,
-  Target
+  Video,
+  Music,
+  Hash,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Instagram,
+  Youtube,
+  Twitter,
+  Facebook
 } from "lucide-react";
 
-interface HypeMoment {
+interface HypeDetection {
   id: string;
   timestamp: string;
   duration: number;
+  type: 'chat_spike' | 'audio_sentiment' | 'viewer_surge' | 'visual_motion';
+  intensity: number;
+  description: string;
   confidence: number;
-  triggers: {
-    chatSpike: number;
-    audioSentiment: number;
-    visualMotion: number;
+  suggestedClip: {
+    startTime: string;
+    endTime: string;
+    title: string;
+    hashtags: string[];
+    description: string;
   };
-  metrics: {
-    chatVelocity: number;
-    emotionScore: number;
-    motionIntensity: number;
-    viewerReactions: number;
-  };
-  preview: string;
-  status: "detecting" | "processing" | "ready" | "published";
 }
 
-interface AIClip {
+interface GeneratedClip {
   id: string;
   title: string;
   description: string;
   hashtags: string[];
   duration: number;
-  hypeMoment: HypeMoment;
-  videoUrl: string;
-  thumbnailUrl: string;
-  platforms: {
-    tiktok: boolean;
-    instagram: boolean;
-    youtube: boolean;
-    twitter: boolean;
-  };
-  analytics: {
-    estimatedViews: number;
-    viralPotential: number;
-    engagementScore: number;
+  format: 'vertical' | 'horizontal' | 'square';
+  platform: string[];
+  status: 'generating' | 'ready' | 'published' | 'failed';
+  thumbnail: string;
+  url?: string;
+  metrics?: {
+    views: number;
+    likes: number;
+    shares: number;
   };
   createdAt: Date;
+  publishedAt?: Date;
 }
 
 const AIClippingSystem = () => {
-  const [activeTab, setActiveTab] = useState("detection");
-  const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [detectionSensitivity, setDetectionSensitivity] = useState(75);
+  const [isLiveDetection, setIsLiveDetection] = useState(false);
+  const [autoPublish, setAutoPublish] = useState(false);
+  const [clipThemes, setClipThemes] = useState<string[]>(['funny', 'hype', 'educational']);
   
-  // Mock real-time hype moments
-  const [hypeMoments, setHypeMoments] = useState<HypeMoment[]>([
+  const [hypeDetections, setHypeDetections] = useState<HypeDetection[]>([
     {
-      id: "hype1",
-      timestamp: "02:15:30",
+      id: '1',
+      timestamp: '15:23',
       duration: 45,
-      confidence: 95,
-      triggers: {
-        chatSpike: 230,
-        audioSentiment: 0.89,
-        visualMotion: 0.76
-      },
-      metrics: {
-        chatVelocity: 45,
-        emotionScore: 0.92,
-        motionIntensity: 0.83,
-        viewerReactions: 156
-      },
-      preview: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      status: "ready"
-    },
-    {
-      id: "hype2", 
-      timestamp: "01:42:18",
-      duration: 32,
+      type: 'chat_spike',
+      intensity: 92,
+      description: 'Massive chat spike during epic fail moment',
       confidence: 87,
-      triggers: {
-        chatSpike: 180,
-        audioSentiment: 0.82,
-        visualMotion: 0.69
-      },
-      metrics: {
-        chatVelocity: 38,
-        emotionScore: 0.85,
-        motionIntensity: 0.71,
-        viewerReactions: 124
-      },
-      preview: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      status: "processing"
+      suggestedClip: {
+        startTime: '15:18',
+        endTime: '16:03',
+        title: 'EPIC FAIL - Chat Goes WILD! 😱',
+        hashtags: ['#EpicFail', '#GamerMoments', '#Viral', '#Funny'],
+        description: 'This moment had everyone in chat going absolutely crazy! The reactions were priceless 😂'
+      }
     },
     {
-      id: "hype3",
-      timestamp: "00:58:45",
-      duration: 28,
-      confidence: 78,
-      triggers: {
-        chatSpike: 150,
-        audioSentiment: 0.75,
-        visualMotion: 0.64
-      },
-      metrics: {
-        chatVelocity: 32,
-        emotionScore: 0.79,
-        motionIntensity: 0.68,
-        viewerReactions: 98
-      },
-      preview: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      status: "detecting"
+      id: '2',
+      timestamp: '28:45',
+      duration: 30,
+      type: 'audio_sentiment',
+      intensity: 88,
+      description: 'High-energy celebration with crowd cheering',
+      confidence: 91,
+      suggestedClip: {
+        startTime: '28:30',
+        endTime: '29:15',
+        title: 'CLUTCH Victory Celebration! 🏆',
+        hashtags: ['#Clutch', '#Victory', '#Gaming', '#Hype'],
+        description: 'The most insane clutch play you\'ll see today! The celebration says it all 🔥'
+      }
     }
   ]);
 
-  // Mock generated clips
-  const [aiClips, setAiClips] = useState<AIClip[]>([
+  const [generatedClips, setGeneratedClips] = useState<GeneratedClip[]>([
     {
-      id: "clip1",
-      title: "INSANE City Build Reveals Epic Bridge Design! 🔥",
-      description: "Watch this mind-blowing moment when our streamer reveals the most incredible bridge design in city building history! The chat went absolutely crazy! 🏗️✨ #CityBuilder #Gaming #Epic",
-      hashtags: ["#CityBuilder", "#Gaming", "#Epic", "#Viral", "#StreamHighlights", "#Architecture", "#Design"],
+      id: '1',
+      title: 'EPIC FAIL - Chat Goes WILD! 😱',
+      description: 'This moment had everyone in chat going absolutely crazy! The reactions were priceless 😂',
+      hashtags: ['#EpicFail', '#GamerMoments', '#Viral', '#Funny'],
       duration: 45,
-      hypeMoment: hypeMoments[0],
-      videoUrl: "https://example.com/clip1.mp4",
-      thumbnailUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      platforms: {
-        tiktok: true,
-        instagram: true, 
-        youtube: true,
-        twitter: false
-      },
-      analytics: {
-        estimatedViews: 125000,
-        viralPotential: 92,
-        engagementScore: 88
-      },
-      createdAt: new Date(Date.now() - 5 * 60 * 1000)
+      format: 'vertical',
+      platform: ['TikTok', 'Instagram Reels'],
+      status: 'ready',
+      thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=400&fit=crop',
+      url: '#',
+      metrics: { views: 12500, likes: 892, shares: 156 },
+      createdAt: new Date(),
+      publishedAt: new Date()
     },
     {
-      id: "clip2",
-      title: "Chat EXPLODED When This Happened! 😱",
-      description: "The moment that broke the internet! Viewers couldn't contain their excitement when this incredible play happened live on stream! 🎮🔥 #StreamMoments #Hype",
-      hashtags: ["#StreamMoments", "#Hype", "#Gaming", "#Reaction", "#Viral", "#LiveStream"],
-      duration: 32,
-      hypeMoment: hypeMoments[1],
-      videoUrl: "https://example.com/clip2.mp4", 
-      thumbnailUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      platforms: {
-        tiktok: true,
-        instagram: false,
-        youtube: true,
-        twitter: true
-      },
-      analytics: {
-        estimatedViews: 89000,
-        viralPotential: 85,
-        engagementScore: 82
-      },
-      createdAt: new Date(Date.now() - 15 * 60 * 1000)
+      id: '2',
+      title: 'CLUTCH Victory Celebration! 🏆',
+      description: 'The most insane clutch play you\'ll see today! The celebration says it all 🔥',
+      hashtags: ['#Clutch', '#Victory', '#Gaming', '#Hype'],
+      duration: 30,
+      format: 'vertical',
+      platform: ['TikTok', 'YouTube Shorts'],
+      status: 'generating',
+      thumbnail: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=300&h=400&fit=crop',
+      createdAt: new Date()
     }
   ]);
 
-  // Real-time metrics
-  const [realtimeMetrics, setRealtimeMetrics] = useState({
-    chatActivity: 0,
-    audioEnergy: 0,
-    visualMotion: 0,
-    currentHypeLevel: 0
+  const [stats, setStats] = useState({
+    totalClips: 127,
+    totalViews: 2840000,
+    averageEngagement: 12.5,
+    viralClips: 8
   });
 
-  // Simulate real-time detection
+  // Simulate real-time hype detection
   useEffect(() => {
+    if (!isLiveDetection) return;
+
     const interval = setInterval(() => {
-      setRealtimeMetrics({
-        chatActivity: Math.random() * 100,
-        audioEnergy: Math.random() * 100,
-        visualMotion: Math.random() * 100,
-        currentHypeLevel: Math.random() * 100
-      });
+      const detectionTypes = ['chat_spike', 'audio_sentiment', 'viewer_surge', 'visual_motion'] as const;
+      const descriptions = [
+        'Chat exploded with reactions',
+        'Intense excitement in audio',
+        'Viewer count spiked rapidly',
+        'High visual motion detected',
+        'Emotional peak detected'
+      ];
 
-      // Randomly add new hype moments
-      if (Math.random() > 0.95) {
-        const newMoment: HypeMoment = {
-          id: `hype_${Date.now()}`,
-          timestamp: new Date().toLocaleTimeString(),
-          duration: Math.floor(Math.random() * 60) + 20,
-          confidence: Math.floor(Math.random() * 40) + 60,
-          triggers: {
-            chatSpike: Math.floor(Math.random() * 200) + 50,
-            audioSentiment: Math.random() * 0.5 + 0.5,
-            visualMotion: Math.random() * 0.5 + 0.5
-          },
-          metrics: {
-            chatVelocity: Math.floor(Math.random() * 50) + 20,
-            emotionScore: Math.random() * 0.4 + 0.6,
-            motionIntensity: Math.random() * 0.4 + 0.6,
-            viewerReactions: Math.floor(Math.random() * 100) + 50
-          },
-          preview: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-          status: "detecting"
-        };
-        
-        setHypeMoments(prev => [newMoment, ...prev.slice(0, 9)]);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const generateClip = async (hypeMoment: HypeMoment) => {
-    // Update status to processing
-    setHypeMoments(prev => 
-      prev.map(moment => 
-        moment.id === hypeMoment.id 
-          ? { ...moment, status: "processing" as const }
-          : moment
-      )
-    );
-
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const newClip: AIClip = {
-        id: `clip_${Date.now()}`,
-        title: `Epic Stream Moment at ${hypeMoment.timestamp}! 🔥`,
-        description: `Incredible moment captured during live stream! Chat activity spiked ${hypeMoment.triggers.chatSpike}% with amazing viewer reactions! 🎮✨ #StreamHighlights #Gaming #Viral`,
-        hashtags: ["#StreamHighlights", "#Gaming", "#Viral", "#LiveStream", "#Epic", "#Hype"],
-        duration: hypeMoment.duration,
-        hypeMoment,
-        videoUrl: "https://example.com/generated-clip.mp4",
-        thumbnailUrl: hypeMoment.preview,
-        platforms: {
-          tiktok: true,
-          instagram: true,
-          youtube: true,
-          twitter: false
-        },
-        analytics: {
-          estimatedViews: Math.floor(Math.random() * 100000) + 50000,
-          viralPotential: hypeMoment.confidence,
-          engagementScore: Math.floor(hypeMoment.confidence * 0.9)
-        },
-        createdAt: new Date()
+      const newDetection: HypeDetection = {
+        id: Date.now().toString(),
+        timestamp: new Date().toLocaleTimeString().slice(0, 5),
+        duration: Math.floor(Math.random() * 60) + 15,
+        type: detectionTypes[Math.floor(Math.random() * detectionTypes.length)],
+        intensity: Math.floor(Math.random() * 30) + 70,
+        description: descriptions[Math.floor(Math.random() * descriptions.length)],
+        confidence: Math.floor(Math.random() * 20) + 80,
+        suggestedClip: {
+          startTime: new Date().toLocaleTimeString().slice(0, 5),
+          endTime: new Date(Date.now() + 60000).toLocaleTimeString().slice(0, 5),
+          title: 'AI Generated Clip Title',
+          hashtags: ['#Viral', '#Gaming', '#Hype'],
+          description: 'AI generated description for this epic moment!'
+        }
       };
 
-      setAiClips(prev => [newClip, ...prev]);
-      
-      // Update hype moment status
-      setHypeMoments(prev => 
-        prev.map(moment => 
-          moment.id === hypeMoment.id 
-            ? { ...moment, status: "ready" as const }
-            : moment
+      setHypeDetections(prev => [newDetection, ...prev.slice(0, 9)]);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [isLiveDetection]);
+
+  const generateClip = (detection: HypeDetection) => {
+    const newClip: GeneratedClip = {
+      id: Date.now().toString(),
+      title: detection.suggestedClip.title,
+      description: detection.suggestedClip.description,
+      hashtags: detection.suggestedClip.hashtags,
+      duration: detection.duration,
+      format: 'vertical',
+      platform: ['TikTok', 'Instagram Reels'],
+      status: 'generating',
+      thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=400&fit=crop',
+      createdAt: new Date()
+    };
+
+    setGeneratedClips(prev => [newClip, ...prev]);
+
+    // Simulate generation process
+    setTimeout(() => {
+      setGeneratedClips(prev => 
+        prev.map(clip => 
+          clip.id === newClip.id 
+            ? { ...clip, status: 'ready', url: '#' }
+            : clip
         )
       );
     }, 3000);
   };
 
-  const getStatusColor = (status: HypeMoment["status"]) => {
-    switch (status) {
-      case "detecting": return "bg-blue-500";
-      case "processing": return "bg-yellow-500";
-      case "ready": return "bg-green-500";
-      case "published": return "bg-purple-500";
-      default: return "bg-gray-500";
+  const publishClip = (clipId: string, platforms: string[]) => {
+    setGeneratedClips(prev =>
+      prev.map(clip =>
+        clip.id === clipId
+          ? { 
+              ...clip, 
+              status: 'published', 
+              platform: platforms,
+              publishedAt: new Date(),
+              metrics: { views: 0, likes: 0, shares: 0 }
+            }
+          : clip
+      )
+    );
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'chat_spike': return <MessageSquare className="h-4 w-4" />;
+      case 'audio_sentiment': return <Volume2 className="h-4 w-4" />;
+      case 'viewer_surge': return <TrendingUp className="h-4 w-4" />;
+      case 'visual_motion': return <Activity className="h-4 w-4" />;
+      default: return <Zap className="h-4 w-4" />;
     }
   };
 
-  const getStatusIcon = (status: HypeMoment["status"]) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case "detecting": return <Eye className="w-4 h-4" />;
-      case "processing": return <Wand2 className="w-4 h-4 animate-spin" />;
-      case "ready": return <Scissors className="w-4 h-4" />;
-      case "published": return <Share2 className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'generating': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900';
+      case 'ready': return 'text-green-600 bg-green-100 dark:bg-green-900';
+      case 'published': return 'text-blue-600 bg-blue-100 dark:bg-blue-900';
+      case 'failed': return 'text-red-600 bg-red-100 dark:bg-red-900';
+      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900';
+    }
+  };
+
+  const getPlatformIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'tiktok': return <Video className="h-4 w-4" />;
+      case 'instagram reels': case 'instagram': return <Instagram className="h-4 w-4" />;
+      case 'youtube shorts': case 'youtube': return <Youtube className="h-4 w-4" />;
+      case 'twitter': return <Twitter className="h-4 w-4" />;
+      case 'facebook': return <Facebook className="h-4 w-4" />;
+      default: return <Share2 className="h-4 w-4" />;
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Scissors className="w-6 h-6 text-primary" />
-            AI Clipping System
-          </h2>
-          <p className="text-muted-foreground">Automatically detect and create viral moments from your stream</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Detection Sensitivity:</span>
-            <div className="w-24">
-              <Progress value={detectionSensitivity} />
+      {/* Control Panel */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Scissors className="h-5 w-5" />
+            AI Auto-Clipping System
+          </CardTitle>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="live-detection">Live Detection</Label>
+              <Switch
+                id="live-detection"
+                checked={isLiveDetection}
+                onCheckedChange={setIsLiveDetection}
+              />
             </div>
-            <span className="text-sm font-medium">{detectionSensitivity}%</span>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="auto-publish">Auto-Publish</Label>
+              <Switch
+                id="auto-publish"
+                checked={autoPublish}
+                onCheckedChange={setAutoPublish}
+              />
+            </div>
           </div>
-          <Button variant="outline" size="sm">
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-        </div>
+        </CardHeader>
+        <CardContent>
+          {isLiveDetection ? (
+            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <Activity className="h-4 w-4 text-green-600 animate-pulse" />
+              <span className="text-sm text-green-700 dark:text-green-300">
+                Live detection active - Monitoring for hype moments
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+              <Video className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Enable live detection to automatically find highlight moments
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Stats Overview */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Clips</p>
+                <p className="text-2xl font-bold">{stats.totalClips}</p>
+              </div>
+              <Video className="h-8 w-8 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Views</p>
+                <p className="text-2xl font-bold">{(stats.totalViews / 1000000).toFixed(1)}M</p>
+              </div>
+              <Eye className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg Engagement</p>
+                <p className="text-2xl font-bold">{stats.averageEngagement}%</p>
+              </div>
+              <Heart className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Viral Clips</p>
+                <p className="text-2xl font-bold">{stats.viralClips}</p>
+              </div>
+              <Star className="h-8 w-8 text-yellow-600" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Real-time Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Chat Activity</span>
-            <MessageSquare className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="space-y-2">
-            <Progress value={realtimeMetrics.chatActivity} className="h-2" />
-            <span className="text-xs text-muted-foreground">{Math.floor(realtimeMetrics.chatActivity)}% intensity</span>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Audio Energy</span>
-            <Volume2 className="w-4 h-4 text-green-500" />
-          </div>
-          <div className="space-y-2">
-            <Progress value={realtimeMetrics.audioEnergy} className="h-2" />
-            <span className="text-xs text-muted-foreground">{Math.floor(realtimeMetrics.audioEnergy)}% excitement</span>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Visual Motion</span>
-            <Eye className="w-4 h-4 text-purple-500" />
-          </div>
-          <div className="space-y-2">
-            <Progress value={realtimeMetrics.visualMotion} className="h-2" />
-            <span className="text-xs text-muted-foreground">{Math.floor(realtimeMetrics.visualMotion)}% movement</span>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Hype Level</span>
-            <Flame className="w-4 h-4 text-red-500" />
-          </div>
-          <div className="space-y-2">
-            <Progress value={realtimeMetrics.currentHypeLevel} className="h-2" />
-            <span className="text-xs text-muted-foreground">{Math.floor(realtimeMetrics.currentHypeLevel)}% viral potential</span>
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto">
-          <TabsTrigger value="detection" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Live Detection
-          </TabsTrigger>
-          <TabsTrigger value="clips" className="flex items-center gap-2">
-            <FileVideo className="w-4 h-4" />
-            Generated Clips
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Analytics
-          </TabsTrigger>
+      <Tabs defaultValue="detection" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="detection">Live Detection</TabsTrigger>
+          <TabsTrigger value="clips">Generated Clips</TabsTrigger>
+          <TabsTrigger value="publishing">Publishing</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
-        {/* Live Detection Tab */}
-        <TabsContent value="detection" className="space-y-6">
+        {/* Live Detection */}
+        <TabsContent value="detection" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-500" />
-                Detected Hype Moments
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {isAnalyzing ? "Live" : "Paused"}
-                </Badge>
+                <Zap className="h-4 w-4" />
+                Real-Time Hype Detection
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {hypeMoments.map((moment) => (
-                  <Card key={moment.id} className="relative overflow-hidden hover-lift">
-                    <div className="relative">
-                      <img 
-                        src={moment.preview} 
-                        alt={`Hype moment at ${moment.timestamp}`}
-                        className="w-full h-32 object-cover"
-                      />
-                      
-                      {/* Status Indicator */}
-                      <div className={`absolute top-2 left-2 ${getStatusColor(moment.status)} text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1`}>
-                        {getStatusIcon(moment.status)}
-                        {moment.status.charAt(0).toUpperCase() + moment.status.slice(1)}
-                      </div>
-                      
-                      {/* Confidence Score */}
-                      <div className="absolute top-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-xs font-bold">
-                        {moment.confidence}%
-                      </div>
-                      
-                      {/* Duration */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {moment.duration}s
-                      </div>
-                    </div>
-
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-lg">{moment.timestamp}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {moment.confidence}% confidence
-                        </Badge>
-                      </div>
-                      
-                      {/* Trigger Metrics */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" />
-                            Chat Spike
-                          </span>
-                          <span className="font-medium">{moment.triggers.chatSpike}</span>
+              <ScrollArea className="h-96">
+                {hypeDetections.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    {isLiveDetection 
+                      ? "Monitoring for hype moments..." 
+                      : "Enable live detection to see real-time highlights"
+                    }
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {hypeDetections.map((detection) => (
+                      <div key={detection.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              {getTypeIcon(detection.type)}
+                            </div>
+                            <div>
+                              <div className="font-medium">
+                                {detection.timestamp} • {detection.duration}s
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {detection.description}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">
+                              {detection.intensity}% intensity
+                            </Badge>
+                            <Badge variant="outline">
+                              {detection.confidence}% confidence
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-3 h-3" />
-                            Sentiment
-                          </span>
-                          <span className="font-medium">{(moment.triggers.audioSentiment * 100).toFixed(0)}%</span>
+                        
+                        <div className="bg-muted/50 p-3 rounded-lg mb-3">
+                          <h4 className="font-medium text-sm mb-2">Suggested Clip:</h4>
+                          <p className="text-sm font-medium">{detection.suggestedClip.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {detection.suggestedClip.description}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {detection.suggestedClip.hashtags.map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="flex items-center gap-1">
-                            <Eye className="w-3 h-3" />
-                            Motion
-                          </span>
-                          <span className="font-medium">{(moment.triggers.visualMotion * 100).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex gap-2">
-                        {moment.status === "ready" ? (
+                        
+                        <div className="flex gap-2">
                           <Button 
-                            className="flex-1 bg-gradient-to-r from-primary to-secondary"
-                            onClick={() => generateClip(moment)}
+                            size="sm" 
+                            onClick={() => generateClip(detection)}
                           >
-                            <Wand2 className="w-4 h-4 mr-2" />
+                            <Scissors className="h-3 w-3 mr-1" />
                             Generate Clip
                           </Button>
-                        ) : moment.status === "processing" ? (
-                          <Button className="flex-1" disabled>
-                            <Wand2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
+                          <Button size="sm" variant="outline">
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
                           </Button>
-                        ) : (
-                          <Button className="flex-1" variant="outline" disabled>
-                            <Eye className="w-4 h-4 mr-2" />
-                            Analyzing...
-                          </Button>
-                        )}
-                        <Button size="icon" variant="outline">
-                          <Play className="w-4 h-4" />
-                        </Button>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Generated Clips Tab */}
-        <TabsContent value="clips" className="space-y-6">
+        {/* Generated Clips */}
+        <TabsContent value="clips" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-500" />
-                AI-Generated Clips
-                <Badge variant="secondary">{aiClips.length} clips ready</Badge>
+                <Video className="h-4 w-4" />
+                Generated Clips Library
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {aiClips.map((clip) => (
-                  <Card key={clip.id} className="overflow-hidden hover-lift">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                      {/* Video Preview */}
-                      <div className="relative">
-                        <img 
-                          src={clip.thumbnailUrl} 
-                          alt={clip.title}
-                          className="w-full h-40 lg:h-32 object-cover rounded-lg"
-                        />
-                        <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                          <Button size="lg" className="rounded-full">
-                            <Play className="w-6 h-6" />
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-xs">
-                          {clip.duration}s
-                        </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {generatedClips.map((clip) => (
+                  <div key={clip.id} className="border rounded-lg overflow-hidden">
+                    <div className="relative">
+                      <img 
+                        src={clip.thumbnail} 
+                        alt={clip.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <Badge className={getStatusColor(clip.status)}>
+                          {clip.status === 'generating' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                          {clip.status === 'ready' && <CheckCircle className="h-3 w-3 mr-1" />}
+                          {clip.status === 'published' && <Upload className="h-3 w-3 mr-1" />}
+                          {clip.status === 'failed' && <XCircle className="h-3 w-3 mr-1" />}
+                          {clip.status}
+                        </Badge>
                       </div>
-                      
-                      {/* Content Details */}
-                      <div className="lg:col-span-2 space-y-4">
-                        <div>
-                          <h3 className="font-bold text-lg mb-2">{clip.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{clip.description}</p>
-                        </div>
-                        
-                        {/* Hashtags */}
-                        <div className="flex flex-wrap gap-1">
-                          {clip.hashtags.slice(0, 5).map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {clip.hashtags.length > 5 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{clip.hashtags.length - 5} more
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {/* Platform Support */}
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium">Optimized for:</span>
-                          <div className="flex gap-2">
-                            {clip.platforms.tiktok && <Badge className="bg-black text-white">TikTok</Badge>}
-                            {clip.platforms.instagram && <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">Instagram</Badge>}
-                            {clip.platforms.youtube && <Badge className="bg-red-500 text-white">YouTube</Badge>}
-                            {clip.platforms.twitter && <Badge className="bg-blue-500 text-white">Twitter</Badge>}
-                          </div>
-                        </div>
-                        
-                        {/* Analytics Predictions */}
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                          <div>
-                            <div className="text-lg font-bold text-primary">{clip.analytics.estimatedViews.toLocaleString()}</div>
-                            <div className="text-xs text-muted-foreground">Est. Views</div>
-                          </div>
-                          <div>
-                            <div className="text-lg font-bold text-green-500">{clip.analytics.viralPotential}%</div>
-                            <div className="text-xs text-muted-foreground">Viral Potential</div>
-                          </div>
-                          <div>
-                            <div className="text-lg font-bold text-purple-500">{clip.analytics.engagementScore}%</div>
-                            <div className="text-xs text-muted-foreground">Engagement</div>
-                          </div>
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          <Button className="flex-1">
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                          <Button variant="outline" className="flex-1">
-                            <Share2 className="w-4 h-4 mr-2" />
-                            Auto-Post
-                          </Button>
-                          <Button size="icon" variant="outline">
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </div>
+                      <div className="absolute bottom-2 right-2">
+                        <Badge variant="secondary">{clip.duration}s</Badge>
                       </div>
                     </div>
-                  </Card>
+                    
+                    <div className="p-4">
+                      <h4 className="font-medium line-clamp-2 mb-2">{clip.title}</h4>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                        {clip.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {clip.hashtags.slice(0, 3).map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        {clip.platform.map((platform, index) => (
+                          <div key={index} className="flex items-center gap-1">
+                            {getPlatformIcon(platform)}
+                            <span className="text-xs">{platform}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {clip.metrics && (
+                        <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground mb-3">
+                          <div className="text-center">
+                            <div className="font-medium">{clip.metrics.views}</div>
+                            <div>Views</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium">{clip.metrics.likes}</div>
+                            <div>Likes</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium">{clip.metrics.shares}</div>
+                            <div>Shares</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2">
+                        {clip.status === 'ready' && (
+                          <>
+                            <Button size="sm" className="flex-1">
+                              <Upload className="h-3 w-3 mr-1" />
+                              Publish
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
+                        {clip.status === 'published' && (
+                          <Button size="sm" variant="outline" className="flex-1">
+                            <Eye className="h-3 w-3 mr-1" />
+                            View Stats
+                          </Button>
+                        )}
+                        {clip.status === 'generating' && (
+                          <Button size="sm" disabled className="flex-1">
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Generating...
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 text-center">
-              <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{hypeMoments.length}</div>
-              <div className="text-sm text-muted-foreground">Hype Moments</div>
-            </Card>
-            
-            <Card className="p-6 text-center">
-              <Scissors className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{aiClips.length}</div>
-              <div className="text-sm text-muted-foreground">Clips Generated</div>
-            </Card>
-            
-            <Card className="p-6 text-center">
-              <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">89%</div>
-              <div className="text-sm text-muted-foreground">Avg Accuracy</div>
-            </Card>
-            
-            <Card className="p-6 text-center">
-              <Users className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">2.1M</div>
-              <div className="text-sm text-muted-foreground">Total Views</div>
-            </Card>
-          </div>
-
-          {/* Performance Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Detection Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Chat Detection Accuracy</span>
-                      <span className="font-medium">94%</span>
+        {/* Publishing Settings */}
+        <TabsContent value="publishing" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Share2 className="h-4 w-4" />
+                  Platform Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { name: 'TikTok', icon: Video, connected: true },
+                  { name: 'Instagram', icon: Instagram, connected: true },
+                  { name: 'YouTube Shorts', icon: Youtube, connected: false },
+                  { name: 'Twitter', icon: Twitter, connected: false }
+                ].map((platform) => (
+                  <div key={platform.name} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <platform.icon className="h-5 w-5" />
+                      <span className="font-medium">{platform.name}</span>
                     </div>
-                    <Progress value={94} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Audio Sentiment Analysis</span>
-                      <span className="font-medium">87%</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={platform.connected ? "default" : "secondary"}>
+                        {platform.connected ? "Connected" : "Not Connected"}
+                      </Badge>
+                      <Button size="sm" variant="outline">
+                        {platform.connected ? "Configure" : "Connect"}
+                      </Button>
                     </div>
-                    <Progress value={87} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Visual Motion Detection</span>
-                      <span className="font-medium">91%</span>
-                    </div>
-                    <Progress value={91} />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Top Performing Clips */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Performing Clips</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {aiClips.slice(0, 3).map((clip, index) => (
-                  <div key={clip.id} className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold">
-                      {index + 1}
-                    </div>
-                    <img 
-                      src={clip.thumbnailUrl} 
-                      alt={clip.title}
-                      className="w-16 h-12 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium line-clamp-1">{clip.title}</h4>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{clip.analytics.estimatedViews.toLocaleString()} views</span>
-                        <span>{clip.analytics.viralPotential}% viral</span>
-                        <span>{clip.analytics.engagementScore}% engagement</span>
-                      </div>
-                    </div>
-                    <Badge variant="outline">
-                      {clip.duration}s
-                    </Badge>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Auto-Publish Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Minimum confidence score</Label>
+                  <div className="w-20">
+                    <Input type="number" defaultValue="85" min="0" max="100" />
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label>Auto-publish viral clips</Label>
+                  <Switch defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label>Require manual approval</Label>
+                  <Switch />
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Default hashtags</Label>
+                  <Textarea 
+                    placeholder="#gaming #viral #highlights #streamer"
+                    className="mt-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Settings */}
+        <TabsContent value="settings" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Detection Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Clip Themes</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {['funny', 'hype', 'educational', 'drama', 'clutch', 'fails'].map((theme) => (
+                      <Badge
+                        key={theme}
+                        variant={clipThemes.includes(theme) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setClipThemes(prev =>
+                            prev.includes(theme)
+                              ? prev.filter(t => t !== theme)
+                              : [...prev, theme]
+                          );
+                        }}
+                      >
+                        {theme}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Sensitivity Levels</Label>
+                  <div className="space-y-3 mt-2">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Chat Activity</span>
+                        <span>High</span>
+                      </div>
+                      <Progress value={80} />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Audio Sentiment</span>
+                        <span>Medium</span>
+                      </div>
+                      <Progress value={60} />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Visual Motion</span>
+                        <span>Low</span>
+                      </div>
+                      <Progress value={40} />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Clip Generation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="clip-length">Default clip length</Label>
+                  <Select defaultValue="45">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 seconds</SelectItem>
+                      <SelectItem value="30">30 seconds</SelectItem>
+                      <SelectItem value="45">45 seconds</SelectItem>
+                      <SelectItem value="60">60 seconds</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="format">Default format</Label>
+                  <Select defaultValue="vertical">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vertical">Vertical (9:16)</SelectItem>
+                      <SelectItem value="square">Square (1:1)</SelectItem>
+                      <SelectItem value="horizontal">Horizontal (16:9)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="quality">Video quality</Label>
+                  <Select defaultValue="1080p">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="720p">720p</SelectItem>
+                      <SelectItem value="1080p">1080p</SelectItem>
+                      <SelectItem value="4k">4K</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
