@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
   Heart, 
   MessageCircle, 
@@ -28,11 +29,14 @@ import {
   Maximize,
   Play,
   Pause,
-  Pin
+  Pin,
+  ChevronUp,
+  X
 } from "lucide-react";
 import LivePolls from "./LivePolls";
 import GamifiedChat from "./GamifiedChat";
 import { useParams } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatMessage {
   id: string;
@@ -67,6 +71,7 @@ interface Giveaway {
 
 const InteractiveStreamPage = () => {
   const { streamId } = useParams();
+  const isMobile = useIsMobile();
   const [message, setMessage] = useState("");
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -76,6 +81,7 @@ const InteractiveStreamPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Mock data
   const stream = {
@@ -210,11 +216,11 @@ const InteractiveStreamPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto p-4 gap-4 grid grid-cols-1 xl:grid-cols-4">
+      <div className={`max-w-[1800px] mx-auto ${isMobile ? 'p-0' : 'p-4'} gap-4 grid grid-cols-1 ${isMobile ? '' : 'xl:grid-cols-4'}`}>
         {/* Main Video Section */}
-        <div className="xl:col-span-3 space-y-4">
+        <div className={`${isMobile ? '' : 'xl:col-span-3'} space-y-4`}>
           {/* Video Player */}
-          <Card className="overflow-hidden bg-black">
+          <Card className={`overflow-hidden bg-black ${isMobile ? 'rounded-none' : ''}`}>
             <div className="relative aspect-video bg-black">
               <img 
                 src={stream.thumbnail}
@@ -223,24 +229,42 @@ const InteractiveStreamPage = () => {
               />
               
               {/* Video Controls Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+              <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${isMobile ? 'opacity-100' : 'opacity-0 hover:opacity-100'} transition-opacity`}>
+                <div className={`absolute bottom-4 ${isMobile ? 'left-2 right-2' : 'left-4 right-4'} flex items-center justify-between`}>
                   <div className="flex items-center gap-3">
-                    <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    <Button 
+                      size={isMobile ? "default" : "sm"} 
+                      variant="ghost" 
+                      className={`text-white hover:bg-white/20 ${isMobile ? 'h-11 w-11' : ''}`}
+                      onClick={() => setIsPlaying(!isPlaying)}
+                    >
+                      {isPlaying ? <Pause className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> : <Play className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />}
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    <Button 
+                      size={isMobile ? "default" : "sm"} 
+                      variant="ghost" 
+                      className={`text-white hover:bg-white/20 ${isMobile ? 'h-11 w-11' : ''}`}
+                      onClick={() => setIsMuted(!isMuted)}
+                    >
+                      {isMuted ? <VolumeX className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} /> : <Volume2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />}
                     </Button>
-                    <span className="text-white text-sm font-medium">{stream.duration}</span>
+                    {!isMobile && <span className="text-white text-sm font-medium">{stream.duration}</span>}
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
-                      <Settings className="w-4 h-4" />
+                    <Button 
+                      size={isMobile ? "default" : "sm"} 
+                      variant="ghost" 
+                      className={`text-white hover:bg-white/20 ${isMobile ? 'h-11 w-11' : ''}`}
+                    >
+                      <Settings className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
-                      <Maximize className="w-4 h-4" />
+                    <Button 
+                      size={isMobile ? "default" : "sm"} 
+                      variant="ghost" 
+                      className={`text-white hover:bg-white/20 ${isMobile ? 'h-11 w-11' : ''}`}
+                    >
+                      <Maximize className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
                     </Button>
                   </div>
                 </div>
@@ -258,14 +282,408 @@ const InteractiveStreamPage = () => {
               </div>
 
               {/* Interactive Overlay - Active Poll */}
-              <div className="absolute bottom-20 left-4 right-4">
-                <Card className="bg-black/80 backdrop-blur-sm text-white border-white/20">
+              {!isMobile && (
+                <div className="absolute bottom-20 left-4 right-4">
+                  <Card className="bg-black/80 backdrop-blur-sm text-white border-white/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-sm">Live Poll</h4>
+                        <Badge variant="secondary" className="text-xs">
+                          {formatTime(activePoll.timeRemaining)}
+                        </Badge>
+                      </div>
+                      <p className="text-sm mb-3">{activePoll.question}</p>
+                      <div className="space-y-2">
+                        {activePoll.options.map((option, index) => {
+                          const percentage = (option.votes / activePoll.totalVotes) * 100;
+                          return (
+                            <div key={index} className="space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span>{option.text}</span>
+                                <span>{option.votes} votes</span>
+                              </div>
+                              <Progress value={percentage} className="h-2" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Stream Info & Actions */}
+          <Card className={`${isMobile ? 'rounded-none p-4' : 'p-6'}`}>
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-2`}>{stream.title}</h1>
+                <div className={`flex items-center ${isMobile ? 'flex-wrap' : ''} gap-4 text-sm text-muted-foreground mb-4`}>
+                  <Badge variant="secondary">{stream.category}</Badge>
+                  <div className="flex items-center">
+                    <Users className="w-4 h-4 mr-1" />
+                    {viewerCount.toLocaleString()} watching
+                  </div>
+                  <div className="flex items-center">
+                    <Heart className="w-4 h-4 mr-1" />
+                    {likes.toLocaleString()} likes
+                  </div>
+                </div>
+                
+                {/* Creator Info */}
+                <div className="flex items-center gap-3 mb-4">
+                  <Avatar className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'}`}>
+                    <AvatarImage src={creator.avatar} alt={creator.name} />
+                    <AvatarFallback>{creator.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{creator.name}</span>
+                      {creator.isVerified && <Badge variant="secondary" className="text-xs">Verified</Badge>}
+                      <Badge variant="outline" className="text-xs">{creator.tier}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{creator.followers.toLocaleString()} followers</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`flex items-center ${isMobile ? 'flex-wrap' : ''} gap-2`}>
+                <Button 
+                  variant={isLiked ? "default" : "outline"} 
+                  size={isMobile ? "default" : "sm"}
+                  onClick={handleLike}
+                  className={isMobile ? 'h-11' : ''}
+                >
+                  <Heart className={`w-4 h-4 ${isMobile ? '' : 'mr-2'} ${isLiked ? 'fill-current' : ''}`} />
+                  {!isMobile && (isLiked ? 'Liked' : 'Like')}
+                </Button>
+                <Button 
+                  variant={isFollowing ? "outline" : "default"} 
+                  size={isMobile ? "default" : "sm"}
+                  onClick={() => setIsFollowing(!isFollowing)}
+                  className={isMobile ? 'h-11' : ''}
+                >
+                  {!isMobile && (isFollowing ? 'Following' : 'Follow')}
+                  {isMobile && <Users className="w-4 h-4" />}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "default" : "sm"} 
+                  onClick={() => setIsBookmarked(!isBookmarked)}
+                  className={isMobile ? 'h-11' : ''}
+                >
+                  <Bookmark className={`w-4 h-4 ${isMobile ? '' : 'mr-2'} ${isBookmarked ? 'fill-current' : ''}`} />
+                  {!isMobile && 'Save'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "default" : "sm"}
+                  className={isMobile ? 'h-11' : ''}
+                >
+                  <Share2 className={`w-4 h-4 ${isMobile ? '' : 'mr-2'}`} />
+                  {!isMobile && 'Share'}
+                </Button>
+                <Button className={`bg-gradient-to-r from-accent to-primary ${isMobile ? 'h-11' : ''}`}>
+                  <Gift className={`w-4 h-4 ${isMobile ? '' : 'mr-2'}`} />
+                  {!isMobile && 'Tip Creator'}
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          {/* Top Tippers */}
+          {!isMobile && (
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                Top Supporters Today
+              </h3>
+              <div className="flex items-center gap-6">
+                {topTippers.map((tipper, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="relative">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={tipper.avatar} alt={tipper.username} />
+                        <AvatarFallback>{tipper.username[0]}</AvatarFallback>
+                      </Avatar>
+                      {index === 0 && (
+                        <Crown className="absolute -top-2 -right-2 w-5 h-5 text-yellow-500" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{tipper.username}</p>
+                      <p className="text-sm text-accent">${tipper.amount}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <div className="xl:col-span-1">
+            <Card className="h-[800px] flex flex-col">
+              {/* Sidebar Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+                <div className="p-4 border-b">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="chat" className="text-xs">
+                      <MessageCircle className="w-4 h-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="polls" className="text-xs">
+                      <Star className="w-4 h-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="giveaway" className="text-xs">
+                      <Gift className="w-4 h-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="viewers" className="text-xs">
+                      <Users className="w-4 h-4" />
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                {/* Chat Tab */}
+                <TabsContent value="chat" className="flex-1 flex flex-col m-0">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4" />
+                      Live Chat ({viewerCount.toLocaleString()})
+                    </h3>
+                  </div>
+
+                  <ScrollArea className="flex-1 p-4">
+                    <GamifiedChat messages={chatMessages} />
+                  </ScrollArea>
+
+                  <div className="p-4 border-t">
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        placeholder="Type a message..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                        className="flex-1"
+                      />
+                      <Button size="icon" onClick={sendMessage}>
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>Be respectful in chat</span>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        <span>Earn XP by chatting!</span>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Polls Tab */}
+                <TabsContent value="polls" className="flex-1 flex flex-col m-0">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Star className="w-4 h-4" />
+                      Live Polls
+                    </h3>
+                  </div>
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-4">
+                      <LivePolls isLive={true} />
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* Giveaway Tab */}
+                <TabsContent value="giveaway" className="flex-1 flex flex-col m-0">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Gift className="w-4 h-4" />
+                      Active Giveaway
+                    </h3>
+                  </div>
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-4">
+                      <Card className="p-4 border-accent/20 bg-accent/5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold">{activeGiveaway.title}</h4>
+                          <Badge variant="secondary">
+                            {formatTime(activeGiveaway.timeRemaining)}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Trophy className="w-4 h-4 text-accent" />
+                            <span className="font-medium">{activeGiveaway.prize}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{activeGiveaway.participants.toLocaleString()} participants</span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium">Requirements:</p>
+                            <ul className="text-xs space-y-1">
+                              {activeGiveaway.requirements.map((req, index) => (
+                                <li key={index} className="flex items-center gap-2">
+                                  <div className="w-1 h-1 bg-accent rounded-full" />
+                                  {req}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <Button className="w-full bg-gradient-to-r from-accent to-primary">
+                            <Gift className="w-4 h-4 mr-2" />
+                            Enter Giveaway
+                          </Button>
+                        </div>
+                      </Card>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* Viewers Tab */}
+                <TabsContent value="viewers" className="flex-1 flex flex-col m-0">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Active Viewers
+                    </h3>
+                  </div>
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-3">
+                      {[...Array(20)].map((_, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={`https://images.unsplash.com/photo-${1500000000000 + index}?w=32&h=32&fit=crop&crop=face`} />
+                            <AvatarFallback>U{index + 1}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">Viewer_{index + 1}</p>
+                            <div className="flex items-center gap-1">
+                              <Badge variant="outline" className="text-xs">
+                                Level {Math.floor(Math.random() * 50) + 1}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </Card>
+          </div>
+        )}
+
+        {/* Mobile Bottom Sheet for Chat and Interactions */}
+        {isMobile && (
+          <>
+            {/* Mobile Bottom Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-50">
+              <div className="flex items-center justify-around p-4">
+                <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="default" className="flex flex-col gap-1 h-auto py-2">
+                      <MessageCircle className="w-5 h-5" />
+                      <span className="text-xs">Chat</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="h-[70vh] p-0">
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-center justify-between p-4 border-b">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <MessageCircle className="w-4 h-4" />
+                          Live Chat ({viewerCount.toLocaleString()})
+                        </h3>
+                      </div>
+
+                      <ScrollArea className="flex-1 p-4">
+                        <GamifiedChat messages={chatMessages} />
+                      </ScrollArea>
+
+                      <div className="p-4 border-t">
+                        <div className="flex gap-2 mb-2">
+                          <Input
+                            placeholder="Type a message..."
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                            className="flex-1 h-11"
+                          />
+                          <Button size="default" onClick={sendMessage} className="h-11 w-11">
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-muted-foreground">
+                          <span>Be respectful in chat</span>
+                          <div className="flex items-center gap-1">
+                            <Zap className="w-3 h-3" />
+                            <span>Earn XP by chatting!</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Button 
+                  variant="ghost" 
+                  size="default" 
+                  className="flex flex-col gap-1 h-auto py-2"
+                  onClick={() => setActiveTab("polls")}
+                >
+                  <Star className="w-5 h-5" />
+                  <span className="text-xs">Polls</span>
+                </Button>
+
+                <Button 
+                  variant="ghost" 
+                  size="default" 
+                  className="flex flex-col gap-1 h-auto py-2"
+                  onClick={() => setActiveTab("giveaway")}
+                >
+                  <Gift className="w-5 h-5" />
+                  <span className="text-xs">Giveaway</span>
+                </Button>
+
+                <Button 
+                  variant="ghost" 
+                  size="default" 
+                  className="flex flex-col gap-1 h-auto py-2"
+                  onClick={() => setActiveTab("viewers")}
+                >
+                  <Users className="w-5 h-5" />
+                  <span className="text-xs">Viewers</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Mobile Poll Overlay */}
+            {activeTab === "polls" && (
+              <div className="fixed inset-x-4 bottom-24 z-40">
+                <Card className="bg-background/95 backdrop-blur-sm border shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-semibold text-sm">Live Poll</h4>
-                      <Badge variant="secondary" className="text-xs">
-                        {formatTime(activePoll.timeRemaining)}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {formatTime(activePoll.timeRemaining)}
+                        </Badge>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setActiveTab("chat")}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                     <p className="text-sm mb-3">{activePoll.question}</p>
                     <div className="space-y-2">
@@ -285,275 +703,97 @@ const InteractiveStreamPage = () => {
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          </Card>
+            )}
 
-          {/* Stream Info & Actions */}
-          <Card className="p-6">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{stream.title}</h1>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <Badge variant="secondary">{stream.category}</Badge>
-                  <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-1" />
-                    {viewerCount.toLocaleString()} watching
-                  </div>
-                  <div className="flex items-center">
-                    <Heart className="w-4 h-4 mr-1" />
-                    {likes.toLocaleString()} likes
-                  </div>
-                </div>
-                
-                {/* Creator Info */}
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={creator.avatar} alt={creator.name} />
-                    <AvatarFallback>{creator.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{creator.name}</span>
-                      {creator.isVerified && <Badge variant="secondary" className="text-xs">Verified</Badge>}
-                      <Badge variant="outline" className="text-xs">{creator.tier}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{creator.followers.toLocaleString()} followers</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant={isLiked ? "default" : "outline"} 
-                  size="sm"
-                  onClick={handleLike}
-                >
-                  <Heart className={`w-4 h-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-                  {isLiked ? 'Liked' : 'Like'}
-                </Button>
-                <Button 
-                  variant={isFollowing ? "outline" : "default"} 
-                  size="sm"
-                  onClick={() => setIsFollowing(!isFollowing)}
-                >
-                  {isFollowing ? 'Following' : 'Follow'}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setIsBookmarked(!isBookmarked)}>
-                  <Bookmark className={`w-4 h-4 mr-2 ${isBookmarked ? 'fill-current' : ''}`} />
-                  Save
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </Button>
-                <Button className="bg-gradient-to-r from-accent to-primary">
-                  <Gift className="w-4 h-4 mr-2" />
-                  Tip Creator
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Top Tippers */}
-          <Card className="p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-500" />
-              Top Supporters Today
-            </h3>
-            <div className="flex items-center gap-6">
-              {topTippers.map((tipper, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={tipper.avatar} alt={tipper.username} />
-                      <AvatarFallback>{tipper.username[0]}</AvatarFallback>
-                    </Avatar>
-                    {index === 0 && (
-                      <Crown className="absolute -top-2 -right-2 w-5 h-5 text-yellow-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{tipper.username}</p>
-                    <p className="text-sm text-accent">${tipper.amount}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="xl:col-span-1">
-          <Card className="h-[800px] flex flex-col">
-            {/* Sidebar Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
-              <div className="p-4 border-b">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="chat" className="text-xs">
-                    <MessageCircle className="w-4 h-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="polls" className="text-xs">
-                    <Star className="w-4 h-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="giveaway" className="text-xs">
-                    <Gift className="w-4 h-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="viewers" className="text-xs">
-                    <Users className="w-4 h-4" />
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              {/* Chat Tab */}
-              <TabsContent value="chat" className="flex-1 flex flex-col m-0">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4" />
-                    Live Chat ({viewerCount.toLocaleString()})
-                  </h3>
-                </div>
-
-                <ScrollArea className="flex-1 p-4">
-                  <GamifiedChat messages={chatMessages} />
-                </ScrollArea>
-
-                <div className="p-4 border-t">
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      placeholder="Type a message..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      className="flex-1"
-                    />
-                    <Button size="icon" onClick={sendMessage}>
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span>Be respectful in chat</span>
-                    <div className="flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      <span>Earn XP by chatting!</span>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Polls Tab */}
-              <TabsContent value="polls" className="flex-1 flex flex-col m-0">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Star className="w-4 h-4" />
-                    Live Polls
-                  </h3>
-                </div>
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
-                    <Card className="p-4">
-                      <h4 className="font-semibold mb-2">{activePoll.question}</h4>
-                      <div className="space-y-3">
-                        {activePoll.options.map((option, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            className="w-full justify-between"
-                          >
-                            <span>{option.text}</span>
-                            <Badge variant="secondary">{option.votes}</Badge>
-                          </Button>
-                        ))}
-                      </div>
-                      <div className="mt-3 text-center">
-                        <Badge variant="secondary">
-                          {formatTime(activePoll.timeRemaining)} remaining
-                        </Badge>
-                      </div>
-                    </Card>
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-
-              {/* Giveaway Tab */}
-              <TabsContent value="giveaway" className="flex-1 flex flex-col m-0">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Gift className="w-4 h-4" />
-                    Active Giveaway
-                  </h3>
-                </div>
-                <ScrollArea className="flex-1 p-4">
-                  <Card className="p-4">
-                    <div className="text-center mb-4">
-                      <Flame className="w-12 h-12 text-orange-500 mx-auto mb-2" />
-                      <h4 className="font-bold text-lg">{activeGiveaway.title}</h4>
-                      <p className="text-accent font-semibold">{activeGiveaway.prize}</p>
+            {/* Mobile Giveaway Overlay */}
+            {activeTab === "giveaway" && (
+              <div className="fixed inset-x-4 bottom-24 z-40 max-h-[50vh] overflow-hidden">
+                <Card className="bg-background/95 backdrop-blur-sm border shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold">{activeGiveaway.title}</h4>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setActiveTab("chat")}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     </div>
                     
-                    <div className="space-y-3 mb-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{formatTime(activeGiveaway.timeRemaining)}</div>
-                        <div className="text-sm text-muted-foreground">Time remaining</div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-accent" />
+                        <span className="font-medium">{activeGiveaway.prize}</span>
                       </div>
                       
-                      <div className="text-center">
-                        <div className="text-xl font-semibold text-primary">{activeGiveaway.participants.toLocaleString()}</div>
-                        <div className="text-sm text-muted-foreground">Participants</div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2 mb-4">
-                      <h5 className="font-semibold text-sm">Requirements:</h5>
-                      {activeGiveaway.requirements.map((req, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <ThumbsUp className="w-3 h-3 text-green-500" />
-                          <span>{req}</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span>{activeGiveaway.participants.toLocaleString()} participants</span>
                         </div>
-                      ))}
+                        <Badge variant="secondary">
+                          {formatTime(activeGiveaway.timeRemaining)}
+                        </Badge>
+                      </div>
+                      
+                      <Button className="w-full bg-gradient-to-r from-accent to-primary h-11">
+                        <Gift className="w-4 h-4 mr-2" />
+                        Enter Giveaway
+                      </Button>
                     </div>
-                    
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500">
-                      <Gift className="w-4 h-4 mr-2" />
-                      Enter Giveaway
-                    </Button>
-                  </Card>
-                </ScrollArea>
-              </TabsContent>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-              {/* Viewers Tab */}
-              <TabsContent value="viewers" className="flex-1 flex flex-col m-0">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Active Viewers
-                  </h3>
-                </div>
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-2">
-                    {chatMessages.slice(0, 10).map((msg) => (
-                      <div key={msg.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50">
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage src={msg.avatar} />
-                          <AvatarFallback>{msg.username[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-medium truncate">{msg.username}</span>
-                            {msg.level && (
+            {/* Mobile Viewers Overlay */}
+            {activeTab === "viewers" && (
+              <div className="fixed inset-x-4 bottom-24 z-40 max-h-[50vh]">
+                <Card className="bg-background/95 backdrop-blur-sm border shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Active Viewers
+                      </h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setActiveTab("chat")}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <ScrollArea className="h-48">
+                      <div className="space-y-3">
+                        {[...Array(10)].map((_, index) => (
+                          <div key={index} className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={`https://images.unsplash.com/photo-${1500000000000 + index}?w=32&h=32&fit=crop&crop=face`} />
+                              <AvatarFallback>U{index + 1}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">Viewer_{index + 1}</p>
                               <Badge variant="outline" className="text-xs">
-                                Lv.{msg.level}
+                                Level {Math.floor(Math.random() * 50) + 1}
                               </Badge>
-                            )}
+                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </Card>
-        </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Add bottom padding to prevent content being hidden behind mobile nav */}
+            <div className="h-24" />
+          </>
+        )}
       </div>
     </div>
   );
