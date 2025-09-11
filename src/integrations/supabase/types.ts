@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          content: string
+          created_at: string | null
+          creator_id: string | null
+          id: string
+          stream_id: string | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          stream_id?: string | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          stream_id?: string | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_profiles: {
         Row: {
           branding_preferences: Json | null
@@ -82,6 +120,53 @@ export type Database = {
           youtube?: string | null
         }
         Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          amount_cents: number | null
+          content: string
+          created_at: string | null
+          currency: string | null
+          id: string
+          is_paid: boolean | null
+          pinned_until: string | null
+          stream_id: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          content: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_paid?: boolean | null
+          pinned_until?: string | null
+          stream_id?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          amount_cents?: number | null
+          content?: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_paid?: boolean | null
+          pinned_until?: string | null
+          stream_id?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       embed_settings: {
         Row: {
@@ -254,6 +339,191 @@ export type Database = {
           title?: string
           type?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          creator_id: string | null
+          currency: string | null
+          id: string
+          message_id: string | null
+          sender_id: string | null
+          status: string | null
+          stream_id: string | null
+          stripe_payment_intent_id: string | null
+          type: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          creator_id?: string | null
+          currency?: string | null
+          id?: string
+          message_id?: string | null
+          sender_id?: string | null
+          status?: string | null
+          stream_id?: string | null
+          stripe_payment_intent_id?: string | null
+          type?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          creator_id?: string | null
+          currency?: string | null
+          id?: string
+          message_id?: string | null
+          sender_id?: string | null
+          status?: string | null
+          stream_id?: string | null
+          stripe_payment_intent_id?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          id: string
+          option_index: number
+          payment_id: string | null
+          poll_id: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          id?: string
+          option_index: number
+          payment_id?: string | null
+          poll_id?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          id?: string
+          option_index?: number
+          payment_id?: string | null
+          poll_id?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          ends_at: string | null
+          id: string
+          min_payment_cents: number | null
+          options: Json
+          question: string
+          stream_id: string | null
+          total_revenue_cents: number | null
+          total_votes: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          ends_at?: string | null
+          id?: string
+          min_payment_cents?: number | null
+          options: Json
+          question: string
+          stream_id?: string | null
+          total_revenue_cents?: number | null
+          total_votes?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          ends_at?: string | null
+          id?: string
+          min_payment_cents?: number | null
+          options?: Json
+          question?: string
+          stream_id?: string | null
+          total_revenue_cents?: number | null
+          total_votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          is_creator: boolean | null
+          updated_at: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          is_creator?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          is_creator?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          username?: string
         }
         Relationships: []
       }
@@ -507,6 +777,7 @@ export type Database = {
           stream_key: string
           thumbnail_url: string | null
           title: string
+          total_revenue_cents: number | null
           viewer_count: number
         }
         Insert: {
@@ -524,6 +795,7 @@ export type Database = {
           stream_key?: string
           thumbnail_url?: string | null
           title?: string
+          total_revenue_cents?: number | null
           viewer_count?: number
         }
         Update: {
@@ -541,6 +813,7 @@ export type Database = {
           stream_key?: string
           thumbnail_url?: string | null
           title?: string
+          total_revenue_cents?: number | null
           viewer_count?: number
         }
         Relationships: []
@@ -613,6 +886,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_pin_duration: {
+        Args: { amount_cents: number }
+        Returns: unknown
+      }
       regenerate_stream_key: {
         Args: { _stream_id: string }
         Returns: string
