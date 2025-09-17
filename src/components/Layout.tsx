@@ -17,11 +17,7 @@ export function Layout({ children }: LayoutProps) {
           {/* Top header with sidebar trigger */}
           <header className="h-14 flex items-center border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
             <div className="flex items-center px-4">
-              <SidebarTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </SidebarTrigger>
+              <SidebarTrigger />
             </div>
           </header>
           

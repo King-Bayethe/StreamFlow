@@ -84,8 +84,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -107,8 +109,10 @@ export function AppSidebar() {
                         to={item.url === "/channel" ? `/channel/${user?.user_metadata?.username || 'me'}` : item.url} 
                         className={getNavCls}
                       >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
+                        <div className="flex items-center gap-3">
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </div>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -127,8 +131,10 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/admin" className={getNavCls}>
-                      <Shield className="h-4 w-4" />
-                      {!collapsed && <span>Admin Dashboard</span>}
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-4 w-4" />
+                        {!collapsed && <span>Admin Dashboard</span>}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -146,8 +152,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
