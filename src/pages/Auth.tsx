@@ -19,12 +19,9 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && !needsOnboarding) {
-      navigate('/', { replace: true });
-    } else if (user && needsOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, [user, needsOnboarding, navigate]);
+    // Redirect to login page - this page is now deprecated
+    navigate('/login', { replace: true });
+  }, [navigate]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);

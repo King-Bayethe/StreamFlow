@@ -12,6 +12,8 @@ import Support from "./pages/Support";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import ViewerProfile from "./pages/ViewerProfile";
 import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { Welcome } from "./pages/Welcome";
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/dashboard" element={<CreatorDashboard />} />
             <Route path="/profile" element={<ViewerProfile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route 
               path="/admin" 

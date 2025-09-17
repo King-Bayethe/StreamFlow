@@ -83,28 +83,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (roleError) {
         console.error('Error fetching user role:', roleError);
         setUserRole('user');
-        setNeedsOnboarding(true);
         return;
       }
 
       setUserRole(roleData?.role || 'user');
-
-      // Check if user needs onboarding
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('onboarding_completed')
-        .eq('user_id', userId)
-        .single();
-
-      if (profileError || !profileData?.onboarding_completed) {
-        setNeedsOnboarding(true);
-      } else {
-        setNeedsOnboarding(false);
-      }
+      setNeedsOnboarding(false);
     } catch (error) {
       console.error('Error in fetchUserRole:', error);
       setUserRole('user');
-      setNeedsOnboarding(true);
     }
   };
 
@@ -141,43 +127,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, username: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            username,
-            full_name: username,
-          }
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          username: username
         }
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Please check your email to confirm your account.",
-        });
       }
+    });
 
-      return { error };
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      return { error };
-    }
+    return { error };
   };
 
   const signIn = async (email: string, password: string) => {
