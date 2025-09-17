@@ -5,8 +5,9 @@ const Home = () => {
   return (
     <>
       <SEOHead 
-        title="Home - Your Personalized Streaming Dashboard"
-        description="Discover live streams, manage your library, get personalized recommendations, and stay connected with your favorite creators."
+        title="StreamFlow - Your Personalized Streaming Dashboard | AI-Powered Live Streaming"
+        description="Access your personalized StreamFlow dashboard. Discover live streams, manage your library, get AI-powered recommendations, and stay connected with your favorite creators."
+        keywords={["streaming dashboard", "live streams", "AI recommendations", "creator platform", "viewer hub"]}
       />
       <ViewerHub />
     </>
