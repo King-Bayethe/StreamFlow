@@ -207,6 +207,75 @@ export type Database = {
           },
         ]
       }
+      creator_profiles: {
+        Row: {
+          avatar_url: string | null
+          average_viewers: number
+          bio: string | null
+          branding_color: string | null
+          created_at: string
+          display_name: string | null
+          facebook_url: string | null
+          follower_count: number
+          id: string
+          instagram_url: string | null
+          is_verified: boolean
+          linkedin_url: string | null
+          stream_count: number
+          total_earnings_cents: number
+          twitter_url: string | null
+          updated_at: string
+          user_id: string
+          username: string
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          average_viewers?: number
+          bio?: string | null
+          branding_color?: string | null
+          created_at?: string
+          display_name?: string | null
+          facebook_url?: string | null
+          follower_count?: number
+          id?: string
+          instagram_url?: string | null
+          is_verified?: boolean
+          linkedin_url?: string | null
+          stream_count?: number
+          total_earnings_cents?: number
+          twitter_url?: string | null
+          updated_at?: string
+          user_id: string
+          username: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          average_viewers?: number
+          bio?: string | null
+          branding_color?: string | null
+          created_at?: string
+          display_name?: string | null
+          facebook_url?: string | null
+          follower_count?: number
+          id?: string
+          instagram_url?: string | null
+          is_verified?: boolean
+          linkedin_url?: string | null
+          stream_count?: number
+          total_earnings_cents?: number
+          twitter_url?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       embed_settings: {
         Row: {
           card_bg_color: string
@@ -611,72 +680,6 @@ export type Database = {
           },
         ]
       }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string
-          is_creator: boolean | null
-          updated_at: string | null
-          user_id: string | null
-          username: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string
-          is_creator?: boolean | null
-          updated_at?: string | null
-          user_id?: string | null
-          username: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string
-          is_creator?: boolean | null
-          updated_at?: string | null
-          user_id?: string | null
-          username?: string
-        }
-        Relationships: []
-      }
-      profiles_backup: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          is_creator: boolean | null
-          updated_at: string | null
-          user_id: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          is_creator?: boolean | null
-          updated_at?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          is_creator?: boolean | null
-          updated_at?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
       review_forms: {
         Row: {
           business_id: string | null
@@ -968,75 +971,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          facebook_url: string | null
-          full_name: string
-          id: string
-          instagram_url: string | null
-          linkedin_url: string | null
-          onboarding_completed: boolean | null
-          selected_role: string | null
-          subscription_plan: string | null
-          subscription_renewal: string | null
-          subscription_renewal_date: string | null
-          subscription_status: string | null
-          twitter_url: string | null
-          updated_at: string | null
-          user_id: string | null
-          username: string
-          website_url: string | null
-          youtube_url: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          facebook_url?: string | null
-          full_name: string
-          id?: string
-          instagram_url?: string | null
-          linkedin_url?: string | null
-          onboarding_completed?: boolean | null
-          selected_role?: string | null
-          subscription_plan?: string | null
-          subscription_renewal?: string | null
-          subscription_renewal_date?: string | null
-          subscription_status?: string | null
-          twitter_url?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          username: string
-          website_url?: string | null
-          youtube_url?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          facebook_url?: string | null
-          full_name?: string
-          id?: string
-          instagram_url?: string | null
-          linkedin_url?: string | null
-          onboarding_completed?: boolean | null
-          selected_role?: string | null
-          subscription_plan?: string | null
-          subscription_renewal?: string | null
-          subscription_renewal_date?: string | null
-          subscription_status?: string | null
-          twitter_url?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          username?: string
-          website_url?: string | null
-          youtube_url?: string | null
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -1061,6 +995,51 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      viewer_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          favorite_categories: string[] | null
+          id: string
+          notification_preferences: Json | null
+          privacy_settings: Json | null
+          total_spent_cents: number
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          favorite_categories?: string[] | null
+          id?: string
+          notification_preferences?: Json | null
+          privacy_settings?: Json | null
+          total_spent_cents?: number
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          favorite_categories?: string[] | null
+          id?: string
+          notification_preferences?: Json | null
+          privacy_settings?: Json | null
+          total_spent_cents?: number
+          updated_at?: string
+          user_id?: string
+          username?: string
         }
         Relationships: []
       }
