@@ -19,6 +19,7 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { Welcome } from "./pages/Welcome";
+import CreatorWelcome from "./pages/CreatorWelcome";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -44,7 +45,8 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/welcome" element={<Welcome />} />
-              <Route 
+              <Route path="/creator-welcome" element={<CreatorWelcome />} />
+              <Route
                 path="/admin" 
                 element={
                   <ProtectedRoute requiredRole="admin">
