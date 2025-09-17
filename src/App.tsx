@@ -12,7 +12,9 @@ import Support from "./pages/Support";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import ViewerProfile from "./pages/ViewerProfile";
 import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,14 @@ const App = () => (
             <Route path="/dashboard" element={<CreatorDashboard />} />
             <Route path="/profile" element={<ViewerProfile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

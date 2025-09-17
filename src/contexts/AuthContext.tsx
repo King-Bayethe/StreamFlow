@@ -7,9 +7,13 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userRole: string | null;
+  isAdmin: boolean;
+  isCreator: boolean;
   signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  refreshUserRole: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,7 +44,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Create or update profile after sign in
           setTimeout(() => {
             createProfile(session.user);
+            fetchUserRole(session.user.id);
           }, 0);
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          setUserRole(null);
         }
         
         setLoading(false);
@@ -50,11 +60,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (!error && data) {
+        setUserRole(data.role);
+      } else {
+        setUserRole('user'); // Default role
+      }
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      setUserRole('user');
+    }
+  };
+
+  const refreshUserRole = async () => {
+    if (user?.id) {
+      await fetchUserRole(user.id);
+    }
+  };
 
   const createProfile = async (user: User) => {
     try {
@@ -174,9 +214,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
+    userRole,
+    isAdmin: userRole === 'admin',
+    isCreator: userRole === 'creator' || userRole === 'admin',
     signUp,
     signIn,
     signOut,
+    refreshUserRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
