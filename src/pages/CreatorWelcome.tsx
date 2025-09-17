@@ -153,12 +153,18 @@ const CreatorWelcome = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="gap-2" asChild>
-                <Link to="/dashboard">
+                <Link to="/channel-setup">
+                  <Settings className="w-5 h-5" />
+                  Complete Channel Setup
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2" asChild>
+                <Link to="/creator-dashboard">
                   <Play className="w-5 h-5" />
                   Go to Dashboard
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="gap-2" asChild>
+              <Button size="lg" variant="ghost" className="gap-2" asChild>
                 <Link to="/support">
                   <MessageSquare className="w-5 h-5" />
                   Get Help
@@ -315,7 +321,7 @@ const CreatorWelcome = () => {
                       </div>
                     </div>
                     <Button className="w-full" asChild>
-                      <Link to="/dashboard">
+                      <Link to="/creator-dashboard">
                         Get Stream Key
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Link>
@@ -464,12 +470,18 @@ const CreatorWelcome = () => {
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="gap-2" asChild>
-                  <Link to="/dashboard">
+                  <Link to="/channel-setup">
+                    <Settings className="w-5 h-5" />
+                    Complete Setup
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="gap-2" asChild>
+                  <Link to="/creator-dashboard">
                     <Play className="w-5 h-5" />
                     Start Streaming Now
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2" asChild>
+                <Button size="lg" variant="ghost" className="gap-2" asChild>
                   <Link to="/support">
                     <MessageSquare className="w-5 h-5" />
                     Contact Support

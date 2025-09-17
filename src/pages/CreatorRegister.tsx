@@ -133,19 +133,29 @@ const CreatorRegister = () => {
         });
       }
 
-      // Update user role to creator
-      await supabase.rpc('update_user_role_from_onboarding', {
+      // Update user role to creator FIRST
+      const { error: roleError } = await supabase.rpc('update_user_role_from_onboarding', {
         _user_id: currentUser.id,
         _selected_role: 'creator'
       });
+
+      if (roleError) {
+        console.error('Error updating user role:', roleError);
+        toast({
+          title: "Role assignment failed",
+          description: "There was an issue setting up your creator role.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Welcome to StreamFlow!",
         description: "Your creator account has been created successfully.",
       });
 
-      // Redirect to channel setup
-      navigate('/channel-setup');
+      // Redirect to creator welcome page
+      navigate('/creator-welcome');
     } catch (error) {
       console.error('Registration error:', error);
       toast({

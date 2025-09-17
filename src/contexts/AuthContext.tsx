@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // Create or update profile after sign in
+          // Only fetch role, don't automatically create profile
+          // Profile creation is handled by registration flows
           setTimeout(() => {
-            createProfile(session.user);
             fetchUserRole(session.user.id);
           }, 0);
         }
@@ -109,6 +109,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const createProfile = async (user: User) => {
     try {
+      // Skip automatic profile creation during registration flows
+      // Profiles are created explicitly in registration components
+      const currentPath = window.location.pathname;
+      if (currentPath.includes('/register') || currentPath.includes('/channel-setup') || currentPath.includes('/creator-welcome')) {
+        return;
+      }
+
       // Get user role to determine which profile table to use
       const { data: roleData } = await supabase
         .from('user_roles')
@@ -125,20 +132,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
 
       if (role === 'creator' || role === 'admin') {
-        const { error } = await supabase
+        // Check if creator profile already exists
+        const { data: existingProfile } = await supabase
           .from('creator_profiles')
-          .upsert(profileData);
-        
-        if (error) {
-          console.error('Error creating creator profile:', error);
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingProfile) {
+          const { error } = await supabase
+            .from('creator_profiles')
+            .insert(profileData);
+          
+          if (error) {
+            console.error('Error creating creator profile:', error);
+          }
         }
       } else {
-        const { error } = await supabase
+        // Check if viewer profile already exists
+        const { data: existingProfile } = await supabase
           .from('viewer_profiles')
-          .upsert(profileData);
-        
-        if (error) {
-          console.error('Error creating viewer profile:', error);
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingProfile) {
+          const { error } = await supabase
+            .from('viewer_profiles')
+            .insert(profileData);
+          
+          if (error) {
+            console.error('Error creating viewer profile:', error);
+          }
         }
       }
     } catch (error) {
