@@ -324,11 +324,11 @@ const ViewerHub = () => {
                 Trending Now
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {liveStreams.map((stream) => (
+                {liveStreams.slice(0, 6).map((stream) => (
                   <Card key={stream.id} className="group overflow-hidden hover-lift hover-glow border-0 card-gradient cursor-pointer">
                     <div className="relative">
                       <img 
-                        src={stream.thumbnail} 
+                        src={stream.thumbnail_url || '/placeholder.svg'} 
                         alt={stream.title}
                         className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -340,16 +340,12 @@ const ViewerHub = () => {
                       </div>
                       
                       <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold live-indicator">
-                        LIVE
+                        {stream.status.toUpperCase()}
                       </div>
-                      
-                      <Badge className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm text-foreground">
-                        {stream.category}
-                      </Badge>
                       
                       <div className="absolute bottom-3 right-3 bg-black/80 text-white px-2 py-1 rounded text-sm flex items-center">
                         <Users className="w-3 h-3 mr-1" />
-                        {stream.viewers.toLocaleString()}
+                        {stream.viewer_count.toLocaleString()}
                       </div>
                     </div>
 
@@ -360,10 +356,10 @@ const ViewerHub = () => {
                       
                       <div className="flex items-center gap-2 mb-3">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={stream.creatorAvatar} alt={stream.creator} />
-                          <AvatarFallback>{stream.creator[0]}</AvatarFallback>
+                          <AvatarImage src={stream.creator.avatar_url || '/placeholder.svg'} alt={stream.creator.display_name || stream.creator.username} />
+                          <AvatarFallback>{(stream.creator.display_name || stream.creator.username)[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="text-sm text-muted-foreground">{stream.creator}</span>
+                        <span className="text-sm text-muted-foreground">{stream.creator.display_name || stream.creator.username}</span>
                       </div>
                       
                       <div className="flex gap-2">
