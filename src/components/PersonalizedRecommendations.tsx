@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 import { 
   Play, 
   Eye, 
@@ -248,10 +249,10 @@ const PersonalizedRecommendations = () => {
         {/* Actions */}
         <div className="flex gap-2">
           <Button className="flex-1" asChild>
-            <a href={`/watch/${rec.id}`}>
+            <Link to={`/watch/${rec.id}`}>
               <Play className="w-4 h-4 mr-2" />
               {rec.isLive ? "Join" : "Watch"}
-            </a>
+            </Link>
           </Button>
           <Button size="icon" variant="outline">
             <Bookmark className="w-4 h-4" />

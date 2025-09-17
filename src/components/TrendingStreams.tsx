@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Heart, DollarSign, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TrendingStreams = () => {
   const streams = [
@@ -108,7 +109,7 @@ const TrendingStreams = () => {
                 </div>
                 
                 <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-white transition-all" asChild>
-                  <a href={`/watch/${stream.id}`}>Watch Now</a>
+                  <Link to={`/watch/${stream.id}`}>Watch Now</Link>
                 </Button>
               </div>
             </Card>

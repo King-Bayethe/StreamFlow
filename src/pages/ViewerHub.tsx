@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import { 
   Play, 
   Star, 
@@ -306,10 +307,10 @@ const ViewerHub = () => {
                       </div>
                       
                       <Button className="w-full" asChild>
-                        <a href={`/watch/${stream.id}`}>
+                        <Link to={`/watch/${stream.id}`}>
                           <Play className="w-4 h-4 mr-2" />
                           Watch Now
-                        </a>
+                        </Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -364,10 +365,10 @@ const ViewerHub = () => {
                       
                       <div className="flex gap-2">
                         <Button className="flex-1" asChild>
-                          <a href={`/watch/${stream.id}`}>
+                          <Link to={`/watch/${stream.id}`}>
                             <Play className="w-4 h-4 mr-2" />
                             Watch
-                          </a>
+                          </Link>
                         </Button>
                         <Button size="icon" variant="outline">
                           <Heart className="w-4 h-4" />

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, SortAsc, Eye, Users, Clock, Play, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface Stream {
   id: string;
@@ -296,10 +297,10 @@ const Browse = () => {
                     variant={stream.status === "live" ? "default" : "secondary"}
                     asChild
                   >
-                    <a href={`/watch/${stream.id}`}>
+                    <Link to={`/watch/${stream.id}`}>
                       <Play className="w-4 h-4 mr-2" />
                       {stream.status === "live" ? "Join Stream" : "View Stream"}
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </Card>

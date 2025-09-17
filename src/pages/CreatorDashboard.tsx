@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link } from "react-router-dom";
 import { 
   DollarSign, 
   Eye, 
@@ -150,10 +151,10 @@ const CreatorDashboard = () => {
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href="/watch/creator-123" target="_blank">
+                <Link to="/watch/creator-123" target="_blank">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   View Channel
-                </a>
+                </Link>
               </Button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 import { 
   Play, 
   Clock, 
@@ -311,10 +312,10 @@ const VODLibrary = () => {
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     <Button className="flex-1" asChild>
-                      <a href={`/watch/${video.id}`}>
+                      <Link to={`/watch/${video.id}`}>
                         <Play className="w-4 h-4 mr-2" />
                         Watch
-                      </a>
+                      </Link>
                     </Button>
                     <Button size="icon" variant="outline">
                       <Heart className="w-4 h-4" />
