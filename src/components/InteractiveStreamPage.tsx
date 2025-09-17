@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Heart, 
   MessageCircle, 
@@ -10,12 +11,16 @@ import {
   Eye, 
   DollarSign,
   Vote,
-  Play
+  Play,
+  Trophy
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from "@/hooks/use-mobile";
 import SuperChatModal from "./SuperChatModal";
 import PaidPollModal from "./PaidPollModal";
+import LiveChatViewer from "./LiveChatViewer";
+import LivePollsViewer from "./LivePollsViewer";
+import ViewerEngagement from "./ViewerEngagement";
 
 interface Poll {
   id: string;
@@ -148,18 +153,41 @@ const InteractiveStreamPage = () => {
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {/* Enhanced Sidebar */}
         {!isMobile && (
-          <div className="xl:col-span-1">
-            <Card className="h-[600px] flex flex-col p-4">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Live Chat
-              </h3>
-              <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                <p>Chat messages will appear here</p>
-              </div>
-            </Card>
+          <div className="xl:col-span-1 space-y-4">
+            <Tabs defaultValue="chat" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="chat" className="flex items-center gap-1">
+                  <MessageCircle className="h-3 w-3" />
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="polls" className="flex items-center gap-1">
+                  <Vote className="h-3 w-3" />
+                  Polls
+                </TabsTrigger>
+                <TabsTrigger value="engagement" className="flex items-center gap-1">
+                  <Trophy className="h-3 w-3" />
+                  Stats
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="chat" className="mt-4">
+                <LiveChatViewer streamId={streamId || 'demo'} className="h-[500px]" />
+              </TabsContent>
+
+              <TabsContent value="polls" className="mt-4">
+                <div className="max-h-[500px] overflow-y-auto">
+                  <LivePollsViewer streamId={streamId || 'demo'} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="engagement" className="mt-4">
+                <div className="max-h-[500px] overflow-y-auto">
+                  <ViewerEngagement streamId={streamId || 'demo'} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
