@@ -82,13 +82,13 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton>
                     <NavLink to={item.url} end className={getNavCls}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full">
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
                       </div>
-                    </NavLink>
+                    </NavLink>    
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -104,12 +104,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {creatorNavItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton>
                       <NavLink 
                         to={item.url === "/channel" ? `/channel/${user?.user_metadata?.username || 'me'}` : item.url} 
                         className={getNavCls}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full">
                           <item.icon className="h-4 w-4" />
                           {!collapsed && <span>{item.title}</span>}
                         </div>
@@ -129,9 +129,9 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton>
                     <NavLink to="/admin" className={getNavCls}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full">
                         <Shield className="h-4 w-4" />
                         {!collapsed && <span>Admin Dashboard</span>}
                       </div>
@@ -150,9 +150,9 @@ export function AppSidebar() {
             <SidebarMenu>
               {userNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton>
                     <NavLink to={item.url} className={getNavCls}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full">
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
                       </div>
@@ -220,8 +220,10 @@ export function AppSidebar() {
         
         {!user && !collapsed && (
           <div className="p-3">
-            <Button asChild className="w-full">
-              <NavLink to="/login">Sign In</NavLink>
+            <Button className="w-full">
+              <NavLink to="/login" className="flex items-center justify-center w-full">
+                Sign In
+              </NavLink>
             </Button>
           </div>
         )}
