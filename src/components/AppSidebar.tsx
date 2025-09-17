@@ -39,7 +39,6 @@ const getHomeUrl = (user: any, isAdmin: boolean, isCreator: boolean) => {
 // Navigation items
 const mainNavItems = [
   { title: "Browse", url: "/browse", icon: Compass },
-  { title: "Watch", url: "/watch", icon: Play },
 ];
 
 const creatorNavItems = [
