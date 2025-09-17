@@ -945,6 +945,8 @@ export type Database = {
           id: string
           instagram_url: string | null
           linkedin_url: string | null
+          onboarding_completed: boolean | null
+          selected_role: string | null
           subscription_plan: string | null
           subscription_renewal: string | null
           subscription_renewal_date: string | null
@@ -965,6 +967,8 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean | null
+          selected_role?: string | null
           subscription_plan?: string | null
           subscription_renewal?: string | null
           subscription_renewal_date?: string | null
@@ -985,6 +989,8 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean | null
+          selected_role?: string | null
           subscription_plan?: string | null
           subscription_renewal?: string | null
           subscription_renewal_date?: string | null
@@ -1045,6 +1051,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_username_available: {
+        Args: { _user_id?: string; _username: string }
+        Returns: boolean
+      }
       regenerate_stream_key: {
         Args: { _stream_id: string }
         Returns: string
@@ -1059,6 +1069,13 @@ export type Database = {
           _latency_ms: number
           _memory_usage: number
           _stream_id: string
+        }
+        Returns: undefined
+      }
+      update_user_role_from_onboarding: {
+        Args: {
+          _selected_role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: undefined
       }

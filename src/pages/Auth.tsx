@@ -7,20 +7,35 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Play, Users, DollarSign } from 'lucide-react';
+import { OnboardingWizard } from '@/components/OnboardingWizard';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp, signIn, user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { signUp, signIn, user, needsOnboarding, completeOnboarding } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (user && !needsOnboarding) {
       navigate('/', { replace: true });
+    } else if (user && needsOnboarding) {
+      setShowOnboarding(true);
     }
-  }, [user, navigate]);
+  }, [user, needsOnboarding, navigate]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    completeOnboarding();
+    navigate('/welcome');
+  };
+
+  // Show onboarding wizard if user needs it
+  if (showOnboarding) {
+    return <OnboardingWizard onComplete={handleOnboardingComplete} />;
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

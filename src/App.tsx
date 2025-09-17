@@ -14,6 +14,7 @@ import ViewerProfile from "./pages/ViewerProfile";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import { Welcome } from "./pages/Welcome";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/dashboard" element={<CreatorDashboard />} />
             <Route path="/profile" element={<ViewerProfile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route 
               path="/admin" 
               element={

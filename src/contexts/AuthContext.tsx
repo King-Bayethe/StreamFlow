@@ -10,10 +10,12 @@ interface AuthContextType {
   userRole: string | null;
   isAdmin: boolean;
   isCreator: boolean;
+  needsOnboarding: boolean;
   signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshUserRole: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,27 +74,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .single();
-      
-      if (!error && data) {
-        setUserRole(data.role);
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        setUserRole('user');
+        setNeedsOnboarding(true);
+        return;
+      }
+
+      setUserRole(roleData?.role || 'user');
+
+      // Check if user needs onboarding
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('onboarding_completed')
+        .eq('user_id', userId)
+        .single();
+
+      if (profileError || !profileData?.onboarding_completed) {
+        setNeedsOnboarding(true);
       } else {
-        setUserRole('user'); // Default role
+        setNeedsOnboarding(false);
       }
     } catch (error) {
-      console.error('Error fetching user role:', error);
+      console.error('Error in fetchUserRole:', error);
       setUserRole('user');
+      setNeedsOnboarding(true);
     }
   };
 
   const refreshUserRole = async () => {
     if (user?.id) {
+      await fetchUserRole(user.id);
+    }
+  };
+
+  const completeOnboarding = async () => {
+    setNeedsOnboarding(false);
+    if (user) {
       await fetchUserRole(user.id);
     }
   };
@@ -217,10 +242,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     userRole,
     isAdmin: userRole === 'admin',
     isCreator: userRole === 'creator' || userRole === 'admin',
+    needsOnboarding,
     signUp,
     signIn,
     signOut,
     refreshUserRole,
+    completeOnboarding,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
