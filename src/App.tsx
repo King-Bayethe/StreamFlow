@@ -11,6 +11,12 @@ import Watch from "./pages/Watch";
 import Channel from "./pages/Channel";
 import Support from "./pages/Support";
 import CreatorDashboard from "./pages/CreatorDashboard";
+import CreatorAnalytics from "./pages/CreatorAnalytics";
+import CreatorStreaming from "./pages/CreatorStreaming";
+import CreatorEngagement from "./pages/CreatorEngagement";
+import CreatorMonetization from "./pages/CreatorMonetization";
+import CreatorAISuite from "./pages/CreatorAISuite";
+import CreatorSettings from "./pages/CreatorSettings";
 import ViewerProfile from "./pages/ViewerProfile";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
@@ -60,6 +66,36 @@ const App = () => (
               <Route path="/creator-dashboard" element={
                 <ProtectedRoute requiredRole="creator">
                   <CreatorDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/analytics" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorAnalytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/streaming" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorStreaming />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/engagement" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorEngagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/monetization" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorMonetization />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/ai-suite" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorAISuite />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator/settings" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorSettings />
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={
