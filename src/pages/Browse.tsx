@@ -147,9 +147,9 @@ const Browse = () => {
   }, [streams, searchTerm, selectedStatus, sortBy]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-muted/30 to-background">
+    <div className="bg-gradient-to-br from-muted/30 to-background">
       {/* Header */}
-      <div className="bg-background/80 backdrop-blur-sm border-b border-border sticky top-0 z-10">
+      <div className="bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div>
