@@ -93,19 +93,30 @@ const Register = () => {
         return;
       }
 
-      // Update profile with additional information
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: displayName,
-          bio: bio,
-          selected_role: selectedRole,
-          onboarding_completed: true
-        })
-        .eq('id', (await supabase.auth.getUser()).data.user?.id);
+      // Create profile based on selected role
+      const profileData = {
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        username: username,
+        display_name: displayName,
+        bio: bio
+      };
 
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
+      if (selectedRole === 'creator') {
+        const { error: profileError } = await supabase
+          .from('creator_profiles')
+          .insert(profileData);
+
+        if (profileError) {
+          console.error('Error creating creator profile:', profileError);
+        }
+      } else {
+        const { error: profileError } = await supabase
+          .from('viewer_profiles')
+          .insert(profileData);
+
+        if (profileError) {
+          console.error('Error creating viewer profile:', profileError);
+        }
       }
 
       // Update user role

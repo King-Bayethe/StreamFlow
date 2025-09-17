@@ -73,26 +73,33 @@ export const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          username,
-          display_name,
-          avatar_url,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
+      // Fetch creator profiles
+      const { data: creatorData, error: creatorError } = await supabase
+        .from('creator_profiles')
+        .select('user_id, username, display_name, avatar_url, created_at');
 
-      if (error) throw error;
+      // Fetch viewer profiles
+      const { data: viewerData, error: viewerError } = await supabase
+        .from('viewer_profiles')
+        .select('user_id, username, display_name, avatar_url, created_at');
+
+      if (creatorError || viewerError) {
+        throw creatorError || viewerError;
+      }
+
+      // Combine both profile types
+      const allProfiles = [
+        ...(creatorData || []),
+        ...(viewerData || [])
+      ];
 
       // Fetch user roles separately
       const { data: rolesData } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
-      // Mock additional user data since we can't access auth.users directly
-      const usersData: User[] = data?.map(profile => {
+      // Create combined user data
+      const usersData: User[] = allProfiles.map(profile => {
         const userRoles = rolesData?.filter(role => role.user_id === profile.user_id) || [];
         return {
           id: profile.user_id || '',
@@ -105,7 +112,10 @@ export const UserManagement = () => {
           },
           user_roles: userRoles.map(r => ({ role: r.role }))
         };
-      }) || [];
+      });
+
+      // Sort by creation date
+      usersData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setUsers(usersData);
     } catch (error) {

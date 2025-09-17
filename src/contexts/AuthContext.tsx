@@ -109,17 +109,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const createProfile = async (user: User) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user.id,
-          username: user.user_metadata?.username || user.email?.split('@')[0] || 'user',
-          display_name: user.user_metadata?.full_name || user.user_metadata?.username || 'Anonymous',
-          avatar_url: user.user_metadata?.avatar_url || null,
-        });
-      
-      if (error) {
-        console.error('Error creating profile:', error);
+      // Get user role to determine which profile table to use
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      const role = roleData?.role || 'user';
+      const profileData = {
+        user_id: user.id,
+        username: user.user_metadata?.username || user.email?.split('@')[0] || 'user',
+        display_name: user.user_metadata?.full_name || user.user_metadata?.username || 'Anonymous',
+        avatar_url: user.user_metadata?.avatar_url || null,
+      };
+
+      if (role === 'creator' || role === 'admin') {
+        const { error } = await supabase
+          .from('creator_profiles')
+          .upsert(profileData);
+        
+        if (error) {
+          console.error('Error creating creator profile:', error);
+        }
+      } else {
+        const { error } = await supabase
+          .from('viewer_profiles')
+          .upsert(profileData);
+        
+        if (error) {
+          console.error('Error creating viewer profile:', error);
+        }
       }
     } catch (error) {
       console.error('Error creating profile:', error);

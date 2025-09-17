@@ -83,7 +83,7 @@ const Browse = () => {
       const creatorIds = data?.map(stream => stream.creator_id) || [];
       
       const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
+        .from('creator_profiles')
         .select('user_id, username, display_name, avatar_url')
         .in('user_id', creatorIds);
 

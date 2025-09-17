@@ -89,27 +89,33 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         return;
       }
 
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          username: profile.username,
-          display_name: profile.displayName || profile.username,
-          avatar_url: profile.avatarUrl
-        })
-        .eq('user_id', user?.id);
+      // Update profile based on selected role
+      const profileData = {
+        username: profile.username,
+        display_name: profile.displayName || profile.username,
+        avatar_url: profile.avatarUrl,
+        bio: profile.bio
+      };
 
-      if (profileError) throw profileError;
+      if (selectedRole === 'creator') {
+        const { error: profileError } = await supabase
+          .from('creator_profiles')
+          .upsert({
+            user_id: user?.id,
+            ...profileData
+          });
 
-      // Update user profile with bio
-      const { error: userProfileError } = await supabase
-        .from('user_profiles')
-        .update({
-          bio: profile.bio
-        })
-        .eq('user_id', user?.id);
+        if (profileError) throw profileError;
+      } else {
+        const { error: profileError } = await supabase
+          .from('viewer_profiles')
+          .upsert({
+            user_id: user?.id,
+            ...profileData
+          });
 
-      if (userProfileError) throw userProfileError;
+        if (profileError) throw profileError;
+      }
 
       // Update role and mark onboarding as complete
       const { error: roleError } = await supabase.rpc('update_user_role_from_onboarding', {

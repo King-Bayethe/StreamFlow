@@ -125,12 +125,12 @@ const InteractiveStreamPage = () => {
 
       if (error) throw error;
 
-      // Get creator profile - use maybeSingle to handle potential duplicates
+      // Get creator profile from creator_profiles table
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+        .from('creator_profiles')
         .select('user_id, username, display_name, avatar_url')
         .eq('user_id', data.creator_id)
-        .maybeSingle();
+        .single();
 
       if (profileError) throw profileError;
 
