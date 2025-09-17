@@ -29,10 +29,11 @@ const CreatorRegister = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true });
+    // Don't redirect during registration flow - only redirect if user is already logged in when component mounts
+    if (user && !loading) {
+      navigate('/welcome', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const checkUsernameAvailability = async (username: string) => {
     if (!username || username.length < 3) return false;
@@ -154,8 +155,10 @@ const CreatorRegister = () => {
         description: "Your creator account has been created successfully.",
       });
 
-      // Redirect to creator welcome page
-      navigate('/creator-welcome');
+      // Add a small delay before navigation to ensure all async operations complete
+      setTimeout(() => {
+        navigate('/creator-welcome');
+      }, 100);
     } catch (error) {
       console.error('Registration error:', error);
       toast({
