@@ -109,6 +109,23 @@ const Register = () => {
         if (profileError) {
           console.error('Error creating creator profile:', profileError);
         }
+
+        // Create channel record for creator
+        const channelData = {
+          creator_id: (await supabase.auth.getUser()).data.user?.id,
+          name: username,
+          display_name: displayName,
+          description: bio || `Welcome to ${displayName}'s channel!`,
+          status: 'active'
+        };
+
+        const { error: channelError } = await supabase
+          .from('channels')
+          .insert(channelData);
+
+        if (channelError) {
+          console.error('Error creating channel:', channelError);
+        }
       } else {
         const { error: profileError } = await supabase
           .from('viewer_profiles')

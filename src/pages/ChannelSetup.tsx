@@ -74,7 +74,8 @@ const ChannelSetup = () => {
     setLoading(true);
     
     try {
-      const setupData = {
+      // Update creator profile
+      const profileData = {
         branding_color: brandingColor,
         content_categories: selectedCategories,
         streaming_schedule: {
@@ -86,13 +87,41 @@ const ChannelSetup = () => {
         setup_step: 4
       };
 
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from('creator_profiles')
-        .update(setupData)
+        .update(profileData)
         .eq('user_id', user?.id);
 
-      if (error) {
-        throw error;
+      if (profileError) {
+        throw profileError;
+      }
+
+      // Update channel with setup data
+      const channelData = {
+        category: selectedCategories[0] || 'Other',
+        tags: selectedCategories,
+        channel_settings: {
+          notifications_enabled: true,
+          chat_enabled: true,
+          subscriber_only_chat: false,
+          mature_content: false,
+          allow_clips: true,
+          branding_color: brandingColor,
+          streaming_schedule: {
+            days: selectedDays,
+            time_slots: timeSlots
+          }
+        }
+      };
+
+      const { error: channelError } = await supabase
+        .from('channels')
+        .update(channelData)
+        .eq('creator_id', user?.id);
+
+      if (channelError) {
+        console.error('Channel update error:', channelError);
+        // Don't throw here as profile was updated successfully
       }
 
       toast({

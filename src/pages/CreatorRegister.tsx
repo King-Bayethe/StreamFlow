@@ -111,6 +111,28 @@ const CreatorRegister = () => {
         console.error('Error creating creator profile:', profileError);
       }
 
+      // Create channel record
+      const channelData = {
+        creator_id: currentUser.id,
+        name: username,
+        display_name: displayName,
+        description: bio || `Welcome to ${displayName}'s channel!`,
+        status: 'active'
+      };
+
+      const { error: channelError } = await supabase
+        .from('channels')
+        .insert(channelData);
+
+      if (channelError) {
+        console.error('Error creating channel:', channelError);
+        toast({
+          title: "Channel creation failed",
+          description: "Your account was created but there was an issue setting up your channel.",
+          variant: "destructive",
+        });
+      }
+
       // Update user role to creator
       await supabase.rpc('update_user_role_from_onboarding', {
         _user_id: currentUser.id,
