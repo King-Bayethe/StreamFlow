@@ -1,6 +1,6 @@
 import { 
   Home, 
-  Search, 
+  Compass, 
   Play, 
   Settings, 
   User, 
@@ -28,9 +28,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+// Helper function to get home URL based on user role
+const getHomeUrl = (user: any, isAdmin: boolean, isCreator: boolean) => {
+  if (!user) return "/";
+  if (isAdmin) return "/admin";
+  if (isCreator) return "/dashboard";
+  return "/home";
+};
+
+// Navigation items
 const mainNavItems = [
-  { title: "Home", url: "/", icon: Home },
-  { title: "Browse", url: "/browse", icon: Search },
+  { title: "Browse", url: "/browse", icon: Compass },
   { title: "Watch", url: "/watch", icon: Play },
 ];
 
@@ -50,6 +58,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   
   const collapsed = state === "collapsed";
+  const homeUrl = getHomeUrl(user, isAdmin, isCreator);
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50";
@@ -80,6 +89,19 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Home - dynamic based on user role */}
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <NavLink to={homeUrl} end className={getNavCls}>
+                    <div className="flex items-center gap-3 w-full">
+                      <Home className="h-4 w-4" />
+                      {!collapsed && <span>Home</span>}
+                    </div>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              {/* Other main navigation items */}
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton>

@@ -12,6 +12,7 @@ import Channel from "./pages/Channel";
 import Support from "./pages/Support";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import ViewerProfile from "./pages/ViewerProfile";
+import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -32,6 +33,7 @@ const App = () => (
           <Layout>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/browse" element={<Browse />} />
               <Route path="/watch/:streamId?" element={<Watch />} />
               <Route path="/channel/:username" element={<Channel />} />
