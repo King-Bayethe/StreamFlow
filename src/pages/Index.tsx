@@ -1,8 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Play, DollarSign, Users } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { user, isAdmin, isCreator } = useAuth();
+
+  // Redirect authenticated users to their appropriate home
+  if (user) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
+    if (isCreator) return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 flex items-center justify-center">
       <div className="text-center space-y-6">

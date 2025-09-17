@@ -10,7 +10,7 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   
   // Pages that should not have sidebar
-  const noSidebarRoutes = ["/", "/login", "/register"];
+  const noSidebarRoutes = ["/", "/login", "/register", "/auth", "/welcome"];
   const shouldShowSidebar = !noSidebarRoutes.includes(location.pathname);
 
   if (!shouldShowSidebar) {
