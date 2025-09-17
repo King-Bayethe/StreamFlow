@@ -58,6 +58,8 @@ import CreatorPollManager from '@/components/CreatorPollManager';
 import SuperChatDashboard from '@/components/SuperChatDashboard';
 import ChatModerationPanel from '@/components/ChatModerationPanel';
 import RevenueAnalytics from '@/components/RevenueAnalytics';
+import StreamScheduler from '@/components/StreamScheduler';
+import CommunityManager from '@/components/CommunityManager';
 import QASession from '@/components/QASession';
 import Giveaways from '@/components/Giveaways';
 import LoyaltyBadges from '@/components/LoyaltyBadges';
@@ -602,6 +604,8 @@ const CreatorDashboard = () => {
             <SuperChatDashboard streamId="mock-stream" />
             <ChatModerationPanel />
             <RevenueAnalytics />
+            <StreamScheduler />
+            <CommunityManager />
           </div>
           </TabsContent>
 
