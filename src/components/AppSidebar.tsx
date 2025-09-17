@@ -12,7 +12,8 @@ import {
   Users,
   DollarSign,
   Zap,
-  PieChart
+  PieChart,
+  HelpCircle
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,13 +54,13 @@ const creatorNavItems = [
   { title: "Engagement", url: "/creator/engagement", icon: Users },
   { title: "Monetization", url: "/creator/monetization", icon: DollarSign },
   { title: "AI Suite", url: "/creator/ai-suite", icon: Zap },
-  { title: "Settings", url: "/creator/settings", icon: Settings },
   { title: "Channel", url: "/channel", icon: Tv },
 ];
 
 const userNavItems = [
   { title: "Profile", url: "/profile", icon: User },
-  { title: "Support", url: "/support", icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Support", url: "/support", icon: HelpCircle },
 ];
 
 export function AppSidebar() {

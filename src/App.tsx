@@ -17,7 +17,8 @@ import CreatorEngagement from "./pages/CreatorEngagement";
 import CreatorMonetization from "./pages/CreatorMonetization";
 import CreatorAISuite from "./pages/CreatorAISuite";
 import CreatorSettings from "./pages/CreatorSettings";
-import ViewerProfile from "./pages/ViewerProfile";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
@@ -93,14 +94,19 @@ const App = () => (
                   <CreatorAISuite />
                 </ProtectedRoute>
               } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
               <Route path="/creator/settings" element={
                 <ProtectedRoute requiredRole="creator">
                   <CreatorSettings />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ViewerProfile />
                 </ProtectedRoute>
               } />
               <Route
