@@ -54,7 +54,10 @@ import OBSIntegrationGuide from '@/components/OBSIntegrationGuide';
 import Simulcasting from '@/components/Simulcasting';
 import UnifiedChat from '@/components/UnifiedChat';
 import Analytics from '@/components/Analytics';
-import LivePolls from '@/components/LivePolls';
+import CreatorPollManager from '@/components/CreatorPollManager';
+import SuperChatDashboard from '@/components/SuperChatDashboard';
+import ChatModerationPanel from '@/components/ChatModerationPanel';
+import RevenueAnalytics from '@/components/RevenueAnalytics';
 import QASession from '@/components/QASession';
 import Giveaways from '@/components/Giveaways';
 import LoyaltyBadges from '@/components/LoyaltyBadges';
@@ -594,7 +597,12 @@ const CreatorDashboard = () => {
 
           {/* Engagement Tabs */}
           <TabsContent value="polls" className="space-y-6">
-            <LivePolls isLive={isLive} />
+          <div className="space-y-6">
+            <CreatorPollManager streamId="mock-stream" isLive={isLive} />
+            <SuperChatDashboard streamId="mock-stream" />
+            <ChatModerationPanel />
+            <RevenueAnalytics />
+          </div>
           </TabsContent>
 
           <TabsContent value="qa" className="space-y-6">
@@ -781,7 +789,7 @@ const CreatorDashboard = () => {
               </TabsList>
 
               <TabsContent value="polls">
-                <LivePolls isLive={isLive} />
+                <CreatorPollManager streamId="mock-stream" isLive={isLive} />
               </TabsContent>
 
               <TabsContent value="qa">
