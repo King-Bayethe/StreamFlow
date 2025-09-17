@@ -1,13 +1,29 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const location = useLocation();
+  
+  // Pages that should not have sidebar
+  const noSidebarRoutes = ["/", "/login", "/register"];
+  const shouldShowSidebar = !noSidebarRoutes.includes(location.pathname);
+
+  if (!shouldShowSidebar) {
+    // Simple layout without sidebar for landing, login, register pages
+    return (
+      <div className="min-h-screen w-full">
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
