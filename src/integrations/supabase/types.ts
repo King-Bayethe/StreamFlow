@@ -160,6 +160,81 @@ export type Database = {
         }
         Relationships: []
       }
+      channels: {
+        Row: {
+          average_viewers: number
+          banner_url: string | null
+          category: string | null
+          channel_settings: Json | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          display_name: string | null
+          featured: boolean
+          follower_count: number
+          id: string
+          last_stream_at: string | null
+          logo_url: string | null
+          name: string
+          social_links: Json | null
+          status: string
+          tags: string[] | null
+          total_streams: number
+          total_views: number
+          trailer_url: string | null
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          average_viewers?: number
+          banner_url?: string | null
+          category?: string | null
+          channel_settings?: Json | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          display_name?: string | null
+          featured?: boolean
+          follower_count?: number
+          id?: string
+          last_stream_at?: string | null
+          logo_url?: string | null
+          name: string
+          social_links?: Json | null
+          status?: string
+          tags?: string[] | null
+          total_streams?: number
+          total_views?: number
+          trailer_url?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          average_viewers?: number
+          banner_url?: string | null
+          category?: string | null
+          channel_settings?: Json | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          display_name?: string | null
+          featured?: boolean
+          follower_count?: number
+          id?: string
+          last_stream_at?: string | null
+          logo_url?: string | null
+          name?: string
+          social_links?: Json | null
+          status?: string
+          tags?: string[] | null
+          total_streams?: number
+          total_views?: number
+          trailer_url?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           amount_cents: number | null
@@ -1085,6 +1160,14 @@ export type Database = {
       regenerate_stream_key: {
         Args: { _stream_id: string }
         Returns: string
+      }
+      update_channel_stats: {
+        Args: {
+          _channel_id: string
+          _follower_change?: number
+          _view_change?: number
+        }
+        Returns: undefined
       }
       update_stream_metrics: {
         Args: {
