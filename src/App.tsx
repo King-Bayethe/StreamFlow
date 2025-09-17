@@ -16,6 +16,8 @@ import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import CreatorRegister from "./pages/CreatorRegister";
+import ChannelSetup from "./pages/ChannelSetup";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { Welcome } from "./pages/Welcome";
@@ -39,13 +41,32 @@ const App = () => (
               <Route path="/watch/:streamId?" element={<Watch />} />
               <Route path="/channel/:username" element={<Channel />} />
               <Route path="/support" element={<Support />} />
-              <Route path="/dashboard" element={<CreatorDashboard />} />
-              <Route path="/profile" element={<ViewerProfile />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/register/creator" element={<CreatorRegister />} />
+              <Route path="/channel-setup" element={
+                <ProtectedRoute requiredRole="creator">
+                  <ChannelSetup />
+                </ProtectedRoute>
+              } />
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/creator-welcome" element={<CreatorWelcome />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/creator-dashboard" element={
+                <ProtectedRoute requiredRole="creator">
+                  <CreatorDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ViewerProfile />
+                </ProtectedRoute>
+              } />
               <Route
                 path="/admin" 
                 element={

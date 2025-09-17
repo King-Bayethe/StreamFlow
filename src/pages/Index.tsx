@@ -47,11 +47,18 @@ const Index = () => {
         </div>
         
         <div className="space-y-4">
-          <Link to="/auth">
-            <Button size="lg" className="mr-4">
-              Get Started
-            </Button>
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link to="/register">
+              <Button size="lg">
+                Get Started
+              </Button>
+            </Link>
+            <Link to="/register/creator">
+              <Button size="lg" variant="secondary">
+                Join as Creator
+              </Button>
+            </Link>
+          </div>
           <Link to="/watch">
             <Button size="lg" variant="outline">
               Watch Demo Stream

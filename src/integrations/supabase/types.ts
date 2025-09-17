@@ -213,6 +213,7 @@ export type Database = {
           average_viewers: number
           bio: string | null
           branding_color: string | null
+          content_categories: string[] | null
           created_at: string
           display_name: string | null
           facebook_url: string | null
@@ -221,7 +222,11 @@ export type Database = {
           instagram_url: string | null
           is_verified: boolean
           linkedin_url: string | null
+          monetization_goals: string[] | null
+          setup_completed: boolean | null
+          setup_step: number | null
           stream_count: number
+          streaming_schedule: Json | null
           total_earnings_cents: number
           twitter_url: string | null
           updated_at: string
@@ -235,6 +240,7 @@ export type Database = {
           average_viewers?: number
           bio?: string | null
           branding_color?: string | null
+          content_categories?: string[] | null
           created_at?: string
           display_name?: string | null
           facebook_url?: string | null
@@ -243,7 +249,11 @@ export type Database = {
           instagram_url?: string | null
           is_verified?: boolean
           linkedin_url?: string | null
+          monetization_goals?: string[] | null
+          setup_completed?: boolean | null
+          setup_step?: number | null
           stream_count?: number
+          streaming_schedule?: Json | null
           total_earnings_cents?: number
           twitter_url?: string | null
           updated_at?: string
@@ -257,6 +267,7 @@ export type Database = {
           average_viewers?: number
           bio?: string | null
           branding_color?: string | null
+          content_categories?: string[] | null
           created_at?: string
           display_name?: string | null
           facebook_url?: string | null
@@ -265,7 +276,11 @@ export type Database = {
           instagram_url?: string | null
           is_verified?: boolean
           linkedin_url?: string | null
+          monetization_goals?: string[] | null
+          setup_completed?: boolean | null
+          setup_step?: number | null
           stream_count?: number
+          streaming_schedule?: Json | null
           total_earnings_cents?: number
           twitter_url?: string | null
           updated_at?: string

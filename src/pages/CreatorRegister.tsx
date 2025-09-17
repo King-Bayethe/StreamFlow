@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Play, Users, DollarSign, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, Play, ArrowLeft, Video, DollarSign, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-const Register = () => {
+const CreatorRegister = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -20,10 +20,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   
-  // Step 2: Role Selection
-  const [selectedRole, setSelectedRole] = useState<'user' | 'creator'>('user');
-  
-  // Step 3: Profile Completion
+  // Step 2: Creator Profile
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   
@@ -71,11 +68,7 @@ const Register = () => {
     setStep(2);
   };
 
-  const handleRoleSelection = () => {
-    setStep(3);
-  };
-
-  const handleProfileCompletion = async (e: React.FormEvent) => {
+  const handleCreatorRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
@@ -93,44 +86,44 @@ const Register = () => {
         return;
       }
 
-      // Create profile based on selected role
-      const profileData = {
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        username: username,
-        display_name: displayName,
-        bio: bio
-      };
-
-      if (selectedRole === 'creator') {
-        const { error: profileError } = await supabase
-          .from('creator_profiles')
-          .insert(profileData);
-
-        if (profileError) {
-          console.error('Error creating creator profile:', profileError);
-        }
-      } else {
-        const { error: profileError } = await supabase
-          .from('viewer_profiles')
-          .insert(profileData);
-
-        if (profileError) {
-          console.error('Error creating viewer profile:', profileError);
-        }
+      // Get the current user
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      if (!currentUser) {
+        throw new Error('User not found after registration');
       }
 
-      // Update user role
+      // Create creator profile
+      const profileData = {
+        user_id: currentUser.id,
+        username: username,
+        display_name: displayName,
+        bio: bio,
+        setup_completed: false,
+        setup_step: 0
+      };
+
+      const { error: profileError } = await supabase
+        .from('creator_profiles')
+        .insert(profileData);
+
+      if (profileError) {
+        console.error('Error creating creator profile:', profileError);
+      }
+
+      // Update user role to creator
       await supabase.rpc('update_user_role_from_onboarding', {
-        _user_id: (await supabase.auth.getUser()).data.user?.id,
-        _selected_role: selectedRole
+        _user_id: currentUser.id,
+        _selected_role: 'creator'
       });
 
       toast({
         title: "Welcome to StreamFlow!",
-        description: "Your account has been created successfully.",
+        description: "Your creator account has been created successfully.",
       });
 
-      navigate('/welcome');
+      // Redirect to channel setup
+      navigate('/channel-setup');
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -146,19 +139,22 @@ const Register = () => {
   const renderAccountCreation = () => (
     <Card>
       <CardHeader>
-        <CardTitle>Create Account</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Video className="h-6 w-6 text-primary" />
+          Create Creator Account
+        </CardTitle>
         <CardDescription>
-          Start your StreamFlow journey
+          Join StreamFlow as a content creator and start building your channel
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAccountCreation} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Channel Username</Label>
             <Input
               id="username"
               type="text"
-              placeholder="Choose a unique username"
+              placeholder="Choose your channel name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -182,7 +178,7 @@ const Register = () => {
             <Input
               id="password"
               type="password"
-              placeholder="Create a password"
+              placeholder="Create a strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -190,7 +186,7 @@ const Register = () => {
             />
           </div>
           <Button type="submit" className="w-full" disabled={checkingUsername}>
-            Next <ArrowRight className="ml-2 h-4 w-4" />
+            Continue to Profile Setup
           </Button>
         </form>
         
@@ -202,114 +198,75 @@ const Register = () => {
           >
             Sign in
           </Link>
-          <span className="text-muted-foreground"> or </span>
-          <Link 
-            to="/register/creator" 
-            className="text-secondary hover:underline font-medium"
-          >
-            Join as Creator
-          </Link>
         </div>
       </CardContent>
     </Card>
   );
 
-  const renderRoleSelection = () => (
+  const renderProfileSetup = () => (
     <Card>
       <CardHeader>
-        <CardTitle>Choose Your Role</CardTitle>
+        <CardTitle>Complete Your Creator Profile</CardTitle>
         <CardDescription>
-          How do you plan to use StreamFlow?
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div 
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              selectedRole === 'user' 
-                ? 'border-primary bg-primary/5' 
-                : 'border-border hover:border-primary/50'
-            }`}
-            onClick={() => setSelectedRole('user')}
-          >
-            <div className="flex items-center space-x-3">
-              <Users className="h-8 w-8 text-primary" />
-              <div>
-                <h3 className="font-semibold">Viewer</h3>
-                <p className="text-sm text-muted-foreground">Watch streams and interact with creators</p>
-              </div>
-            </div>
-          </div>
-          
-          <div 
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              selectedRole === 'creator' 
-                ? 'border-primary bg-primary/5' 
-                : 'border-border hover:border-primary/50'
-            }`}
-            onClick={() => setSelectedRole('creator')}
-          >
-            <div className="flex items-center space-x-3">
-              <DollarSign className="h-8 w-8 text-secondary" />
-              <div>
-                <h3 className="font-semibold">Creator</h3>
-                <p className="text-sm text-muted-foreground">Stream content and monetize your audience</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={() => setStep(1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-          <Button onClick={handleRoleSelection}>
-            Next <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const renderProfileCompletion = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Complete Your Profile</CardTitle>
-        <CardDescription>
-          Tell us a bit about yourself
+          Tell your future audience about yourself and your content
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleProfileCompletion} className="space-y-4">
+        <form onSubmit={handleCreatorRegistration} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="displayName">Display Name</Label>
             <Input
               id="displayName"
               type="text"
-              placeholder="How should others see your name?"
+              placeholder="How should viewers see your name?"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bio">Bio (Optional)</Label>
+            <Label htmlFor="bio">Channel Description</Label>
             <Textarea
               id="bio"
-              placeholder="Tell us about yourself..."
+              placeholder="Describe your channel and the content you'll create..."
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              rows={3}
+              rows={4}
+              maxLength={500}
             />
+            <p className="text-xs text-muted-foreground">
+              {bio.length}/500 characters
+            </p>
+          </div>
+          
+          <div className="bg-secondary/10 rounded-lg p-4 space-y-3">
+            <h4 className="font-medium flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              What's Next?
+            </h4>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Users className="h-3 w-3" />
+                <span>Channel branding & setup</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Video className="h-3 w-3" />
+                <span>Streaming preferences</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-3 w-3" />
+                <span>Monetization options</span>
+              </div>
+            </div>
           </div>
           
           <div className="flex justify-between pt-4">
-            <Button variant="outline" onClick={() => setStep(2)}>
+            <Button variant="outline" onClick={() => setStep(1)}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Complete Registration
+              Create Creator Account
             </Button>
           </div>
         </form>
@@ -327,18 +284,24 @@ const Register = () => {
               StreamFlow
             </span>
           </div>
-          <h1 className="text-3xl font-bold">Join StreamFlow</h1>
+          <h1 className="text-3xl font-bold">Become a Creator</h1>
           <p className="text-muted-foreground">
-            Step {step} of 3 - {step === 1 ? 'Account' : step === 2 ? 'Role' : 'Profile'}
+            Step {step} of 2 - {step === 1 ? 'Account Creation' : 'Profile Setup'}
           </p>
         </div>
 
         {step === 1 && renderAccountCreation()}
-        {step === 2 && renderRoleSelection()}
-        {step === 3 && renderProfileCompletion()}
+        {step === 2 && renderProfileSetup()}
+        
+        <div className="text-center text-sm text-muted-foreground">
+          Want to join as a viewer instead?{' '}
+          <Link to="/register" className="text-primary hover:underline">
+            Regular Registration
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default CreatorRegister;
