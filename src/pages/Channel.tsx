@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SEOHead from '@/components/SEOHead';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Creator {
   id: string;
@@ -78,94 +79,112 @@ const Channel: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data - in real app, fetch based on username
-    const mockCreator: Creator = {
-      id: 'creator-1',
-      username: username || 'gaming-pro',
-      displayName: 'Gaming Pro Studio',
-      bio: 'Welcome to my channel! I stream the latest games, provide tutorials, and share epic gaming moments. Join our community of 45K+ gamers!',
-      avatar: '/api/placeholder/200/200',
-      banner: '/api/placeholder/1200/300',
-      followers: 45230,
-      totalViews: 2847593,
-      isVerified: true,
-      isLive: true,
-      currentViewers: 1247,
-      streamTitle: 'Epic Boss Battles & New Game Reviews',
-      socialLinks: {
-        youtube: 'https://youtube.com/gaming-pro',
-        twitter: 'https://twitter.com/gaming-pro',
-        instagram: 'https://instagram.com/gaming-pro',
-        twitch: 'https://twitch.tv/gaming-pro',
-        website: 'https://gaming-pro.com'
-      },
-      tags: ['Gaming', 'Reviews', 'Tutorials', 'Live Streams'],
-      joinedDate: '2022-03-15'
-    };
-
-    const mockVideos: VideoItem[] = [
-      {
-        id: 'v1',
-        title: 'Channel Trailer - Welcome to Gaming Pro!',
-        description: 'Get to know what this channel is all about',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '2:35',
-        views: 15420,
-        uploadDate: '2024-01-01',
-        isPinned: true,
-        isTrailer: true
-      },
-      {
-        id: 'v2',
-        title: 'Ultimate Gaming Setup Tour 2024',
-        description: 'Complete breakdown of my streaming setup',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '12:47',
-        views: 89234,
-        uploadDate: '2024-01-10'
-      },
-      {
-        id: 'v3',
-        title: 'Top 10 Games to Watch in 2024',
-        description: 'My predictions for the biggest games this year',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '15:23',
-        views: 156789,
-        uploadDate: '2024-01-08'
-      },
-      {
-        id: 'v4',
-        title: 'Live Stream Highlights - Epic Wins',
-        description: 'Best moments from last week\'s streams',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '8:52',
-        views: 45632,
-        uploadDate: '2024-01-05'
-      },
-      {
-        id: 'v5',
-        title: 'Beginner\'s Guide to Competitive Gaming',
-        description: 'Everything you need to know to get started',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '18:45',
-        views: 234567,
-        uploadDate: '2024-01-03'
-      },
-      {
-        id: 'v6',
-        title: 'Gaming News Weekly - January Edition',
-        description: 'All the latest gaming news and updates',
-        thumbnail: '/api/placeholder/320/180',
-        duration: '11:30',
-        views: 67891,
-        uploadDate: '2023-12-28'
-      }
-    ];
-
-    setCreator(mockCreator);
-    setVideos(mockVideos);
-    setLoading(false);
+    fetchChannelData();
   }, [username]);
+
+  const fetchChannelData = async () => {
+    if (!username) return;
+    
+    try {
+      // Fetch channel data from Supabase
+      const { data: channel, error: channelError } = await supabase
+        .from('channels')
+        .select('*')
+        .eq('name', username)
+        .eq('status', 'active')
+        .single();
+
+      if (channelError) {
+        console.error('Channel not found:', channelError);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch creator profile separately
+      const { data: creatorProfile } = await supabase
+        .from('creator_profiles')
+        .select('*')
+        .eq('user_id', channel.creator_id)
+        .single();
+
+      // Fetch current live stream
+      const { data: currentStream } = await supabase
+        .from('streams')
+        .select('*')
+        .eq('creator_id', channel.creator_id)
+        .eq('status', 'live')
+        .single();
+
+      if (channel) {
+        const creatorData: Creator = {
+          id: channel.creator_id,
+          username: channel.name,
+          displayName: channel.display_name || creatorProfile?.display_name || channel.name,
+          bio: channel.description || creatorProfile?.bio || '',
+          avatar: channel.logo_url || creatorProfile?.avatar_url || '/api/placeholder/200/200',
+          banner: channel.banner_url || '/api/placeholder/1200/300',
+          followers: channel.follower_count || 0,
+          totalViews: channel.total_views || 0,
+          isVerified: channel.verified || creatorProfile?.is_verified || false,
+          isLive: currentStream?.status === 'live',
+          currentViewers: currentStream?.viewer_count || 0,
+          streamTitle: currentStream?.title || '',
+          socialLinks: (channel.social_links as any) || {},
+          tags: (channel.tags as string[]) || [],
+          joinedDate: channel.created_at || creatorProfile?.created_at || '2024-01-01'
+        };
+
+        setCreator(creatorData);
+
+        // Fetch stream recordings as videos
+        const { data: streams } = await supabase
+          .from('streams')
+          .select('id')
+          .eq('creator_id', channel.creator_id);
+        
+        const streamIds = streams?.map(s => s.id) || [];
+        
+        const { data: recordings } = await supabase
+          .from('stream_recordings')
+          .select('*')
+          .in('stream_id', streamIds)
+          .eq('is_public', true)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (recordings) {
+          const videoData: VideoItem[] = recordings.map(recording => ({
+            id: recording.id,
+            title: recording.title,
+            description: `Stream recording from ${formatDate(recording.created_at)}`,
+            thumbnail: recording.thumbnail_url || '/api/placeholder/320/180',
+            duration: formatDuration(recording.duration_seconds),
+            views: recording.view_count,
+            uploadDate: recording.created_at,
+            isPinned: false,
+            isTrailer: false
+          }));
+
+          setVideos(videoData);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching channel data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
@@ -241,7 +260,10 @@ const Channel: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Channel not found</h1>
-          <p className="text-muted-foreground">The creator you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-4">The creator you're looking for doesn't exist.</p>
+          <Button asChild>
+            <Link to="/browse">Browse Channels</Link>
+          </Button>
         </div>
       </div>
     );

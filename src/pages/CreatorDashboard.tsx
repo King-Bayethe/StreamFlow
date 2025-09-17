@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   DollarSign, 
   Eye, 
@@ -74,9 +75,12 @@ import AIDiscoveryEngine from '@/components/AIDiscoveryEngine';
 import AILiveCaptions from '@/components/AILiveCaptions';
 import AIAgentMarketplace from '@/components/AIAgentMarketplace';
 import AIContentOptimizer from '@/components/AIContentOptimizer';
+import ChannelManager from '@/components/ChannelManager';
 
 const CreatorDashboard = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [channelData, setChannelData] = useState({ name: '' }); // Add channel data state
   const [isLive, setIsLive] = useState(false);
   const [streamTitle, setStreamTitle] = useState("Epic Gaming Session");
   const [streamDescription, setStreamDescription] = useState("Join me for an amazing gaming adventure!");
@@ -151,7 +155,7 @@ const CreatorDashboard = () => {
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/watch/creator-123" target="_blank">
+                <Link to={`/channel/${channelData.name || 'setup-required'}`} target="_blank">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   View Channel
                 </Link>
@@ -162,7 +166,7 @@ const CreatorDashboard = () => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -174,6 +178,10 @@ const CreatorDashboard = () => {
             <TabsTrigger value="streaming" className="flex items-center gap-2">
               <Radio className="w-4 h-4" />
               Streaming
+            </TabsTrigger>
+            <TabsTrigger value="channel" className="flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Channel
             </TabsTrigger>
             <TabsTrigger value="engagement" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -319,6 +327,11 @@ const CreatorDashboard = () => {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <Analytics />
+          </TabsContent>
+
+          {/* Channel Management Tab */}
+          <TabsContent value="channel" className="space-y-6">
+            <ChannelManager onChannelUpdate={(channelName) => setChannelData({ name: channelName })} />
           </TabsContent>
 
           {/* Streaming Tab */}
