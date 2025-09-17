@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,11 +32,17 @@ import {
   Pause,
   Pin,
   ChevronUp,
-  X
+  X,
+  DollarSign,
+  Vote
 } from "lucide-react";
 import LivePolls from "./LivePolls";
 import GamifiedChat from "./GamifiedChat";
-import { useParams } from "react-router-dom";
+import SuperChatModal from "./SuperChatModal";
+import PaidPollModal from "./PaidPollModal";
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatMessage {
@@ -58,6 +65,19 @@ interface ActivePoll {
   options: Array<{ text: string; votes: number }>;
   totalVotes: number;
   timeRemaining: number;
+  minPaymentCents?: number;
+  totalRevenueCents?: number;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  options: { text: string; votes: number; revenue: number }[];
+  min_payment_cents: number;
+  total_votes: number;
+  total_revenue_cents: number;
+  ends_at: string;
+  creator_id: string;
 }
 
 interface Giveaway {
@@ -71,7 +91,10 @@ interface Giveaway {
 
 const InteractiveStreamPage = () => {
   const { streamId } = useParams();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [message, setMessage] = useState("");
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -82,6 +105,18 @@ const InteractiveStreamPage = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showSuperChatModal, setShowSuperChatModal] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
+  const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
+  const [realMessages, setRealMessages] = useState<any[]>([]);
+  const [activePaidPolls, setActivePaidPolls] = useState<Poll[]>([]);
+
+  // Authentication check
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
 
   // Mock data
   const stream = {
@@ -176,23 +211,100 @@ const InteractiveStreamPage = () => {
     { username: "CityFan", amount: 150, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop" }
   ];
 
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      username: "You",
-      message: message.trim(),
-      timestamp: new Date(),
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      level: 25,
-      badges: ["supporter"],
-      xpGained: 10
+  // Load real chat messages and polls
+  useEffect(() => {
+    const loadData = async () => {
+      if (!streamId) return;
+      
+      try {
+        // Load messages
+        const { data: messagesData } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('stream_id', streamId)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (messagesData) {
+          setRealMessages(messagesData);
+        }
+
+        // Load active polls
+        const { data: pollsData } = await supabase
+          .from('polls')
+          .select('*')
+          .eq('stream_id', streamId)
+          .gt('ends_at', new Date().toISOString())
+          .order('created_at', { ascending: false });
+
+        if (pollsData) {
+          setActivePaidPolls(pollsData);
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
     };
+
+    loadData();
+
+    // Real-time subscriptions for chat and polls
+    const messagesChannel = supabase
+      .channel(`stream_${streamId}_messages`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `stream_id=eq.${streamId}`
+      }, (payload) => {
+        setRealMessages(prev => [payload.new as any, ...prev]);
+      })
+      .subscribe();
+
+    const pollsChannel = supabase
+      .channel(`stream_${streamId}_polls`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'polls',
+        filter: `stream_id=eq.${streamId}`
+      }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setActivePaidPolls(prev => [payload.new as any, ...prev]);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(pollsChannel);
+    };
+  }, [streamId]);
     
-    setChatMessages(prev => [...prev, newMessage]);
-    setMessage("");
+  const sendMessage = async () => {
+    if (!message.trim() || !user || !streamId) return;
+    
+    try {
+      await supabase.from('chat_messages').insert({
+        stream_id: streamId,
+        user_id: user.id,
+        username: user.user_metadata?.username || user.email?.split('@')[0] || 'Anonymous',
+        content: message,
+        is_paid: false
+      });
+
+      setMessage("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
   };
+
+  const handlePollClick = (poll: Poll) => {
+    setSelectedPoll(poll);
+    setShowPollModal(true);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -384,9 +496,9 @@ const InteractiveStreamPage = () => {
                   <Share2 className={`w-4 h-4 ${isMobile ? '' : 'mr-2'}`} />
                   {!isMobile && 'Share'}
                 </Button>
-                <Button className={`bg-gradient-to-r from-accent to-primary ${isMobile ? 'h-11' : ''}`}>
-                  <Gift className={`w-4 h-4 ${isMobile ? '' : 'mr-2'}`} />
-                  {!isMobile && 'Tip Creator'}
+                <Button className={`bg-gradient-to-r from-accent to-primary ${isMobile ? 'h-11' : ''}`} onClick={() => setShowSuperChatModal(true)}>
+                  <DollarSign className={`w-4 h-4 ${isMobile ? '' : 'mr-2'}`} />
+                  {!isMobile && 'Super Chat'}
                 </Button>
               </div>
             </div>
@@ -795,6 +907,20 @@ const InteractiveStreamPage = () => {
           </>
         )}
       </div>
+
+      {/* Modals */}
+      <SuperChatModal
+        isOpen={showSuperChatModal}
+        onClose={() => setShowSuperChatModal(false)}
+        streamId={streamId || 'demo'}
+        creatorId={creator.id}
+      />
+      
+      <PaidPollModal
+        isOpen={showPollModal}
+        onClose={() => setShowPollModal(false)}
+        poll={selectedPoll}
+      />
     </div>
   );
 };
