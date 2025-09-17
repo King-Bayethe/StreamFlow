@@ -12,15 +12,32 @@ import {
   DollarSign,
   Vote,
   Play,
-  Trophy
+  Trophy,
+  Loader2
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import SuperChatModal from "./SuperChatModal";
 import PaidPollModal from "./PaidPollModal";
 import LiveChatViewer from "./LiveChatViewer";
 import LivePollsViewer from "./LivePollsViewer";
 import ViewerEngagement from "./ViewerEngagement";
+
+interface StreamData {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  status: string;
+  creator: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+}
 
 interface Poll {
   id: string;
@@ -38,35 +55,135 @@ const InteractiveStreamPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const { toast } = useToast();
   
   const [isLiked, setIsLiked] = useState(false);
-  const [viewerCount, setViewerCount] = useState(12847);
+  const [viewerCount, setViewerCount] = useState(0);
   const [showSuperChatModal, setShowSuperChatModal] = useState(false);
   const [showPollModal, setShowPollModal] = useState(false);
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
+  const [streamData, setStreamData] = useState<StreamData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Authentication check
   useEffect(() => {
     if (!user) {
       navigate('/auth');
+    } else if (streamId) {
+      fetchStreamData();
     }
-  }, [user, navigate]);
+  }, [user, navigate, streamId]);
+
+  // Real-time viewer count updates
+  useEffect(() => {
+    if (!streamId) return;
+
+    const channel = supabase
+      .channel(`stream-${streamId}`)
+      .on('presence', { event: 'sync' }, () => {
+        const newState = channel.presenceState();
+        setViewerCount(Object.keys(newState).length);
+      })
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        setViewerCount(prev => prev + newPresences.length);
+      })
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        setViewerCount(prev => Math.max(0, prev - leftPresences.length));
+      })
+      .subscribe();
+
+    // Track viewer presence
+    if (user) {
+      channel.track({
+        user_id: user.id,
+        username: user.user_metadata?.username || user.email?.split('@')[0],
+        joined_at: new Date().toISOString(),
+      });
+    }
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [streamId, user]);
+
+  const fetchStreamData = async () => {
+    if (!streamId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('streams')
+        .select(`
+          id,
+          title,
+          description,
+          thumbnail_url,
+          status,
+          creator_id
+        `)
+        .eq('id', streamId)
+        .single();
+
+      if (error) throw error;
+
+      // Get creator profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url')
+        .eq('user_id', data.creator_id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      setStreamData({
+        ...data,
+        creator: {
+          id: profile.user_id,
+          username: profile.username,
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching stream:', error);
+      toast({
+        title: "Error",
+        description: "Stream not found or failed to load.",
+        variant: "destructive"
+      });
+      navigate('/browse');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user) {
     return null;
   }
 
-  const mockCreator = {
-    id: 'creator-1',
-    username: 'ProStreamer',
-    display_name: 'Pro Streamer',
-    avatar: '/placeholder.svg',
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Loading stream...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const mockStream = {
-    title: 'Epic Gaming Session - Road to Rank 1!',
-    category: 'Gaming',
-  };
+  if (!streamData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Stream Not Found</h2>
+          <p className="text-muted-foreground mb-4">The stream you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/browse')}>
+            Browse Streams
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -107,9 +224,11 @@ const InteractiveStreamPage = () => {
           <Card className="p-6">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{mockStream.title}</h1>
+                <h1 className="text-2xl font-bold mb-2">{streamData.title}</h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <Badge variant="outline">{mockStream.category}</Badge>
+                  <Badge variant="outline">
+                    {streamData.status === 'live' ? 'LIVE' : 'OFFLINE'}
+                  </Badge>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
                     {viewerCount.toLocaleString()} viewers
@@ -119,12 +238,14 @@ const InteractiveStreamPage = () => {
                 {/* Creator Info */}
                 <div className="flex items-center gap-3">
                   <img
-                    src={mockCreator.avatar}
-                    alt={mockCreator.display_name}
+                    src={streamData.creator.avatar_url || '/placeholder.svg'}
+                    alt={streamData.creator.display_name || streamData.creator.username}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <span className="font-semibold">{mockCreator.display_name}</span>
+                    <span className="font-semibold">
+                      {streamData.creator.display_name || streamData.creator.username}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -197,7 +318,7 @@ const InteractiveStreamPage = () => {
         isOpen={showSuperChatModal}
         onClose={() => setShowSuperChatModal(false)}
         streamId={streamId || 'demo'}
-        creatorId={mockCreator.id}
+        creatorId={streamData.creator.id}
       />
       
       <PaidPollModal

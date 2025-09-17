@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,16 +17,37 @@ import {
   Crown,
   Trophy,
   Sparkles,
-  Target
+  Target,
+  Loader2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import VODLibrary from "@/components/VODLibrary";
 import PersonalizedRecommendations from "@/components/PersonalizedRecommendations";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
 
+interface LiveStream {
+  id: string;
+  title: string;
+  creator: {
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+  thumbnail_url: string | null;
+  viewer_count: number;
+  status: string;
+}
+
 const ViewerHub = () => {
   const [activeTab, setActiveTab] = useState("discover");
+  const [liveStreams, setLiveStreams] = useState<LiveStream[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Mock user data
+  // Mock user data - this could be fetched from user_profiles table
   const userStats = {
     watchTime: "127h 45m",
     tipsGiven: 250.75,
@@ -38,38 +59,87 @@ const ViewerHub = () => {
     currentTier: "Supporter"
   };
 
-  const liveStreams = [
-    {
-      id: "1",
-      title: "Epic Gaming Marathon - City Building Challenge",
-      creator: "ProGamer_2024",
-      creatorAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
-      thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
-      viewers: 12500,
-      category: "Gaming",
-      isFollowing: true
-    },
-    {
-      id: "2",
-      title: "Digital Art Masterclass: Character Design",
-      creator: "ArtisticMind",
-      creatorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5ff?w=100&h=100&fit=crop&crop=face",
-      thumbnail: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=300&fit=crop",
-      viewers: 3200,
-      category: "Creative",
-      isFollowing: true
-    },
-    {
-      id: "3",
-      title: "Cooking with Chef Marco: Italian Cuisine",
-      creator: "ChefMarco",
-      creatorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      thumbnail: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
-      viewers: 8700,
-      category: "Lifestyle",
-      isFollowing: false
+  useEffect(() => {
+    fetchLiveStreams();
+    
+    // Set up real-time subscription for stream updates
+    const channel = supabase
+      .channel('live-streams')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'streams',
+          filter: 'status=eq.live'
+        },
+        () => fetchLiveStreams()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchLiveStreams = async () => {
+    try {
+      const { data: streams, error } = await supabase
+        .from('streams')
+        .select(`
+          id,
+          title,
+          creator_id,
+          thumbnail_url,
+          viewer_count,
+          status
+        `)
+        .eq('status', 'live')
+        .order('viewer_count', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      // Get creator profiles
+      const creatorIds = streams?.map(stream => stream.creator_id) || [];
+      
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url')
+        .in('user_id', creatorIds);
+
+      if (profileError) throw profileError;
+
+      const profileMap = profiles?.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>) || {};
+
+      const formattedStreams: LiveStream[] = (streams || []).map(stream => ({
+        id: stream.id,
+        title: stream.title,
+        creator: {
+          username: profileMap[stream.creator_id]?.username || 'Unknown',
+          display_name: profileMap[stream.creator_id]?.display_name,
+          avatar_url: profileMap[stream.creator_id]?.avatar_url
+        },
+        thumbnail_url: stream.thumbnail_url,
+        viewer_count: stream.viewer_count,
+        status: stream.status
+      }));
+
+      setLiveStreams(formattedStreams);
+    } catch (error) {
+      console.error('Error fetching live streams:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load live streams.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const recentAchievements = [
     { badge: "loyal_viewer", name: "Loyal Viewer", earned: "2 days ago" },
@@ -197,11 +267,11 @@ const ViewerHub = () => {
                 Live from Your Followed Creators
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {liveStreams.filter(stream => stream.isFollowing).map((stream) => (
+                {liveStreams.slice(0, 3).map((stream) => (
                   <Card key={stream.id} className="group overflow-hidden hover-lift hover-glow border-0 card-gradient cursor-pointer">
                     <div className="relative">
                       <img 
-                        src={stream.thumbnail} 
+                        src={stream.thumbnail_url || '/placeholder.svg'} 
                         alt={stream.title}
                         className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -213,16 +283,12 @@ const ViewerHub = () => {
                       </div>
                       
                       <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold live-indicator">
-                        LIVE
+                        {stream.status.toUpperCase()}
                       </div>
-                      
-                      <Badge className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm text-foreground">
-                        {stream.category}
-                      </Badge>
                       
                       <div className="absolute bottom-3 right-3 bg-black/80 text-white px-2 py-1 rounded text-sm flex items-center">
                         <Users className="w-3 h-3 mr-1" />
-                        {stream.viewers.toLocaleString()}
+                        {stream.viewer_count.toLocaleString()}
                       </div>
                     </div>
 
@@ -233,10 +299,10 @@ const ViewerHub = () => {
                       
                       <div className="flex items-center gap-2 mb-3">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={stream.creatorAvatar} alt={stream.creator} />
-                          <AvatarFallback>{stream.creator[0]}</AvatarFallback>
+                          <AvatarImage src={stream.creator.avatar_url || '/placeholder.svg'} alt={stream.creator.display_name || stream.creator.username} />
+                          <AvatarFallback>{(stream.creator.display_name || stream.creator.username)[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="text-sm text-muted-foreground">{stream.creator}</span>
+                        <span className="text-sm text-muted-foreground">{stream.creator.display_name || stream.creator.username}</span>
                       </div>
                       
                       <Button className="w-full" asChild>

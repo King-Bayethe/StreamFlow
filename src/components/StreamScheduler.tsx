@@ -24,9 +24,12 @@ import {
   AlertCircle,
   Zap,
   Globe,
-  MessageSquare
+  MessageSquare,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ScheduledStream {
   id: string;
@@ -65,10 +68,12 @@ interface AnnouncementTemplate {
 
 const StreamScheduler = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [scheduledStreams, setScheduledStreams] = useState<ScheduledStream[]>([]);
   const [templates, setTemplates] = useState<StreamTemplate[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementTemplate[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newStream, setNewStream] = useState({
     title: '',
     description: '',
@@ -82,86 +87,99 @@ const StreamScheduler = () => {
     recurringDays: [] as string[]
   });
 
-  // Mock data initialization
   useEffect(() => {
-    const mockStreams: ScheduledStream[] = [
-      {
-        id: '1',
-        title: 'Epic Gaming Marathon',
-        description: 'Join me for an epic 6-hour gaming session with viewer games!',
-        scheduledAt: new Date(Date.now() + 86400000), // Tomorrow
-        duration: 360,
-        category: 'Gaming',
-        thumbnail: '/api/placeholder/400/225',
+    if (user) {
+      fetchUserStreams();
+    }
+  }, [user]);
+
+  const fetchUserStreams = async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch user's streams
+      const { data: userStreams, error: streamsError } = await supabase
+        .from('streams')
+        .select('*')
+        .eq('creator_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (streamsError) throw streamsError;
+
+      // Convert database streams to ScheduledStream format
+      const formattedStreams: ScheduledStream[] = (userStreams || []).map(stream => ({
+        id: stream.id,
+        title: stream.title,
+        description: stream.description || '',
+        scheduledAt: new Date(stream.created_at),
+        duration: 120, // Default duration
+        category: 'Gaming', // Default category
+        thumbnail: stream.thumbnail_url || '/api/placeholder/400/225',
         isRecurring: false,
         recurringDays: [],
-        status: 'scheduled',
-        notifyFollowers: true,
-        autoStart: true,
-        platforms: ['main', 'twitch', 'youtube']
-      },
-      {
-        id: '2',
-        title: 'Weekly Art Stream',
-        description: 'Digital art creation and tutorials every Wednesday',
-        scheduledAt: new Date(Date.now() + 259200000), // 3 days from now
-        duration: 180,
-        category: 'Art',
-        thumbnail: '/api/placeholder/400/225',
-        isRecurring: true,
-        recurringDays: ['wednesday'],
-        status: 'scheduled',
+        status: stream.status as any,
         notifyFollowers: true,
         autoStart: false,
-        platforms: ['main', 'youtube']
-      }
-    ];
-    setScheduledStreams(mockStreams);
+        platforms: ['main']
+      }));
 
-    const mockTemplates: StreamTemplate[] = [
-      {
-        id: '1',
-        name: 'Gaming Session',
-        title: 'Epic Gaming with {{username}}',
-        description: 'Join me for some amazing {{game}} gameplay! Drop your suggestions in chat!',
-        category: 'Gaming',
-        tags: ['gaming', 'interactive', 'fun'],
-        thumbnail: '/api/placeholder/400/225'
-      },
-      {
-        id: '2',
-        name: 'Tutorial Stream',
-        title: '{{skill}} Tutorial - Learn with {{username}}',
-        description: 'Learn {{skill}} step by step in this comprehensive tutorial stream.',
-        category: 'Education',
-        tags: ['tutorial', 'educational', 'learning'],
-        thumbnail: '/api/placeholder/400/225'
-      }
-    ];
-    setTemplates(mockTemplates);
+      setScheduledStreams(formattedStreams);
 
-    const mockAnnouncements: AnnouncementTemplate[] = [
-      {
-        id: '1',
-        name: 'Stream Starting Soon',
-        platform: 'all',
-        message: '🔴 LIVE in 1 hour! {{title}} - {{url}}',
-        timing: '1hour',
-        isActive: true
-      },
-      {
-        id: '2',
-        name: 'Stream Live Now',
-        platform: 'twitter',
-        message: '🎮 LIVE NOW: {{title}} Come join the fun! {{url}} #streaming #{{category}}',
-        timing: 'immediate',
-        isActive: true
-      }
-    ];
-    setAnnouncements(mockAnnouncements);
-  }, []);
+      // Initialize default templates
+      const defaultTemplates: StreamTemplate[] = [
+        {
+          id: '1',
+          name: 'Gaming Session',
+          title: 'Epic Gaming with {{username}}',
+          description: 'Join me for some amazing {{game}} gameplay! Drop your suggestions in chat!',
+          category: 'Gaming',
+          tags: ['gaming', 'interactive', 'fun'],
+          thumbnail: '/api/placeholder/400/225'
+        },
+        {
+          id: '2',
+          name: 'Tutorial Stream',
+          title: '{{skill}} Tutorial - Learn with {{username}}',
+          description: 'Learn {{skill}} step by step in this comprehensive tutorial stream.',
+          category: 'Education',
+          tags: ['tutorial', 'educational', 'learning'],
+          thumbnail: '/api/placeholder/400/225'
+        }
+      ];
+      setTemplates(defaultTemplates);
 
-  const scheduleStream = () => {
+      const defaultAnnouncements: AnnouncementTemplate[] = [
+        {
+          id: '1',
+          name: 'Stream Starting Soon',
+          platform: 'all',
+          message: '🔴 LIVE in 1 hour! {{title}} - {{url}}',
+          timing: '1hour',
+          isActive: true
+        },
+        {
+          id: '2',
+          name: 'Stream Live Now',
+          platform: 'twitter',
+          message: '🎮 LIVE NOW: {{title}} Come join the fun! {{url}} #streaming #{{category}}',
+          timing: 'immediate',
+          isActive: true
+        }
+      ];
+      setAnnouncements(defaultAnnouncements);
+    } catch (error) {
+      console.error('Error fetching user streams:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load scheduled streams.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const scheduleStream = async () => {
     if (!newStream.title || !newStream.scheduledAt) {
       toast({
         title: "Invalid Stream",
@@ -171,33 +189,67 @@ const StreamScheduler = () => {
       return;
     }
 
-    const stream: ScheduledStream = {
-      id: Date.now().toString(),
-      ...newStream,
-      scheduledAt: new Date(newStream.scheduledAt),
-      status: 'scheduled',
-      thumbnail: '/api/placeholder/400/225'
-    };
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to schedule streams",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    setScheduledStreams(prev => [stream, ...prev]);
-    setNewStream({
-      title: '',
-      description: '',
-      scheduledAt: '',
-      duration: 120,
-      category: 'Gaming',
-      notifyFollowers: true,
-      autoStart: false,
-      platforms: ['main'],
-      isRecurring: false,
-      recurringDays: []
-    });
-    setShowCreateForm(false);
+    try {
+      // Create new stream in database
+      const { data, error } = await supabase
+        .from('streams')
+        .insert({
+          creator_id: user.id,
+          title: newStream.title,
+          description: newStream.description,
+          status: 'scheduled',
+          thumbnail_url: '/api/placeholder/400/225'
+        })
+        .select()
+        .single();
 
-    toast({
-      title: "Stream Scheduled",
-      description: `Stream scheduled for ${stream.scheduledAt.toLocaleString()}`
-    });
+      if (error) throw error;
+
+      // Add to local state
+      const stream: ScheduledStream = {
+        id: data.id,
+        ...newStream,
+        scheduledAt: new Date(newStream.scheduledAt),
+        status: 'scheduled',
+        thumbnail: '/api/placeholder/400/225'
+      };
+
+      setScheduledStreams(prev => [stream, ...prev]);
+      setNewStream({
+        title: '',
+        description: '',
+        scheduledAt: '',
+        duration: 120,
+        category: 'Gaming',
+        notifyFollowers: true,
+        autoStart: false,
+        platforms: ['main'],
+        isRecurring: false,
+        recurringDays: []
+      });
+      setShowCreateForm(false);
+
+      toast({
+        title: "Stream Scheduled",
+        description: `Stream scheduled for ${stream.scheduledAt.toLocaleString()}`
+      });
+    } catch (error) {
+      console.error('Error scheduling stream:', error);
+      toast({
+        title: "Error",
+        description: "Failed to schedule stream. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const cancelStream = (streamId: string) => {
@@ -397,7 +449,14 @@ const StreamScheduler = () => {
 
           {/* Scheduled Streams List */}
           <div className="grid gap-4">
-            {scheduledStreams.length === 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Loader2 className="w-6 h-6 mx-auto animate-spin mb-2" />
+                  <p className="text-muted-foreground">Loading streams...</p>
+                </CardContent>
+              </Card>
+            ) : scheduledStreams.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />

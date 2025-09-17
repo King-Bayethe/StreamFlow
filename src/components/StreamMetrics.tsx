@@ -91,27 +91,19 @@ const StreamMetrics: React.FC<StreamMetricsProps> = ({ streamId, isLive }) => {
     }
   };
 
-  // Generate mock real-time data for demo
+  // Remove mock real-time data generation
   useEffect(() => {
-    if (isLive && streamId) {
-      const mockDataInterval = setInterval(() => {
-        const mockMetric: StreamMetric = {
-          id: `mock-${Date.now()}`,
-          stream_id: streamId,
-          timestamp: new Date().toISOString(),
-          bitrate: Math.floor(Math.random() * 1000) + 2500,
-          fps: Math.random() * 5 + 28,
-          dropped_frames: Math.floor(Math.random() * 10),
-          cpu_usage: Math.random() * 30 + 40,
-          memory_usage: Math.random() * 20 + 60,
-          latency_ms: Math.floor(Math.random() * 100) + 50,
-          connection_quality: ['excellent', 'good', 'fair'][Math.floor(Math.random() * 3)] as any
-        };
-        setCurrentMetrics(mockMetric);
-        setHistoricalMetrics(prev => [mockMetric, ...prev.slice(0, 19)]);
-      }, 3000);
+    if (!streamId) {
+      setLoading(false);
+      return;
+    }
 
-      return () => clearInterval(mockDataInterval);
+    fetchMetrics();
+    
+    // Set up real-time updates for live streams
+    if (isLive) {
+      const interval = setInterval(fetchMetrics, 2000);
+      return () => clearInterval(interval);
     }
   }, [isLive, streamId]);
 
